@@ -1,0 +1,13 @@
+listen:
+  type:
+  bind_ip: localhost
+  port: 8080
+db:
+  uri: mongodb://localhost:27017
+  database: go-commerce
+jwt:
+  secret: jtwSecret
+  accessTokenTime: 300000 #15 minutes
+  refreshTokenTimes: 86400 #60 days
+redis:
+  uri: localhost:6379
