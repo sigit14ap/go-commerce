@@ -15,9 +15,18 @@ type failure struct {
 	Error failureInfo `json:"error"`
 }
 
+type failureValidation struct {
+	Error failureInfoValidation `json:"error"`
+}
+
 type failureInfo struct {
 	Code    int    `json:"code" example:"400"`
 	Message string `json:"message" example:"invalid request body"`
+}
+
+type failureInfoValidation struct {
+	Code    int   `json:"code" example:"400"`
+	Message error `json:"error"  example:"invalid request body"`
 }
 
 func successResponse(context *gin.Context, data interface{}) {
@@ -31,9 +40,17 @@ func createdResponse(context *gin.Context, data interface{}) {
 }
 
 func errorResponse(c *gin.Context, statusCode int, message string) {
-	log.Error(message)
+	// log.Error(message)
 	c.AbortWithStatusJSON(statusCode, failure{Error: failureInfo{
 		Code:    statusCode,
 		Message: message,
+	}})
+}
+
+func errorValidationResponse(c *gin.Context, statusCode int, err error) {
+	// log.Error(message)
+	c.AbortWithStatusJSON(statusCode, failureValidation{Error: failureInfoValidation{
+		Code:    statusCode,
+		Message: err,
 	}})
 }

@@ -32,7 +32,7 @@ func (u *UsersService) FindByID(ctx context.Context, userID primitive.ObjectID) 
 	return u.repo.FindByID(ctx, userID)
 }
 
-func (u *UsersService) FindByCredentials(ctx context.Context, signInDTO dto.SignInDTO) (domain.User, error) {
+func (u *UsersService) FindByCredentials(ctx context.Context, signInDTO dto.SignInDTO) (domain.LoginUser, error) {
 	return u.repo.FindByCredentials(ctx, signInDTO.Email, signInDTO.Password)
 }
 
@@ -97,7 +97,7 @@ func HashPassword(password string) (string, error) {
 	return string(bytes), err
 }
 
-func CheckPasswordHash(password, hash string) bool {
+func (u *UsersService) CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }

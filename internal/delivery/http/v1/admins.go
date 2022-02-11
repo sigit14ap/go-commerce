@@ -85,10 +85,16 @@ func (h *Handler) adminSignIn(context *gin.Context) {
 	admin, err := h.services.Admins.FindByCredentials(context, signInDTO)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			errorResponse(context, http.StatusUnauthorized, "invalid admin credentials")
+			errorResponse(context, http.StatusUnauthorized, "Email not found")
 		} else {
 			errorResponse(context, http.StatusInternalServerError, err.Error())
 		}
+		return
+	}
+
+	matchPassword := h.services.Users.CheckPasswordHash(signInDTO.Password, admin.Password)
+	if matchPassword == false {
+		errorResponse(context, http.StatusUnauthorized, "Password does not match")
 		return
 	}
 

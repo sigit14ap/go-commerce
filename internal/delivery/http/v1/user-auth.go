@@ -3,11 +3,11 @@ package v1
 import (
 	"errors"
 	"fmt"
+	"github.com/go-playground/validator/v10"
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 	"github.com/sigit14ap/go-commerce/internal/domain"
 	"github.com/sigit14ap/go-commerce/internal/domain/dto"
 	"github.com/sigit14ap/go-commerce/pkg/auth"
@@ -33,25 +33,27 @@ var validate *validator.Validate = validator.New()
 func (h *Handler) userSignIn(context *gin.Context) {
 	var signInDTO dto.SignInDTO
 
-	err := validate.Struct(&signInDTO)
+	err := context.BindJSON(&signInDTO)
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, "failed validation")
+		errorResponse(context, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
-	// err := context.BindJSON(&signInDTO)
-	// if err != nil {
-	// 	errorResponse(context, http.StatusBadRequest, "invalid input body")
-	// 	return
-	// }
-
 	user, err := h.services.Users.FindByCredentials(context, signInDTO)
+
+	log.Error(h.services.Users.CheckPasswordHash(signInDTO.Password, user.Password))
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			errorResponse(context, http.StatusUnauthorized, "invalid user credentials")
+			errorResponse(context, http.StatusUnauthorized, "Email not found")
 		} else {
 			errorResponse(context, http.StatusInternalServerError, err.Error())
 		}
+		return
+	}
+
+	matchPassword := h.services.Users.CheckPasswordHash(signInDTO.Password, user.Password)
+	if matchPassword == false {
+		errorResponse(context, http.StatusUnauthorized, "Password does not match")
 		return
 	}
 
@@ -85,8 +87,12 @@ func (h *Handler) userSignUp(context *gin.Context) {
 
 	err := context.ShouldBindJSON(&signUpDTO)
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, err.Error())
-		return
+
+		for _, fieldErr := range err.(validator.ValidationErrors) {
+			log.Error(fieldErr)
+			errorResponse(context, http.StatusBadRequest, fmt.Sprintf(fieldErr.Error()))
+			return // exit on first error
+		}
 	}
 
 	var cartID primitive.ObjectID

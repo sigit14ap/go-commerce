@@ -13,12 +13,13 @@ import (
 type Users interface {
 	FindAll(ctx context.Context) ([]domain.User, error)
 	FindByID(ctx context.Context, userID primitive.ObjectID) (domain.User, error)
-	FindByCredentials(ctx context.Context, signInDTO dto.SignInDTO) (domain.User, error)
+	FindByCredentials(ctx context.Context, signInDTO dto.SignInDTO) (domain.LoginUser, error)
 	FindUserInfo(ctx context.Context, userID primitive.ObjectID) (domain.UserInfo, error)
 	Create(ctx context.Context, userDTO dto.CreateUserDTO) (domain.User, error)
 	Update(ctx context.Context, userDTO dto.UpdateUserDTO,
 		userID primitive.ObjectID) (domain.User, error)
 	Delete(ctx context.Context, userID primitive.ObjectID) error
+	CheckPasswordHash(password, hash string) bool
 }
 
 type Products interface {
@@ -43,6 +44,7 @@ type Reviews interface {
 
 type Admins interface {
 	FindByCredentials(ctx context.Context, signInDTO dto.SignInDTO) (domain.Admin, error)
+	CheckPasswordHash(password, hash string) bool
 }
 
 type Carts interface {

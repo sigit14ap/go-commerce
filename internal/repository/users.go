@@ -52,11 +52,10 @@ func (u UsersRepo) FindByID(ctx context.Context, userID primitive.ObjectID) (dom
 	return user, err
 }
 
-func (u UsersRepo) FindByCredentials(ctx context.Context, email string, password string) (domain.User, error) {
-	result := u.db.FindOne(ctx, bson.M{"email": email, "password": password},
-		options.FindOne().SetProjection(bson.M{"password": 0}))
+func (u UsersRepo) FindByCredentials(ctx context.Context, email string, password string) (domain.LoginUser, error) {
+	result := u.db.FindOne(ctx, bson.M{"email": email})
 
-	var user domain.User
+	var user domain.LoginUser
 	err := result.Decode(&user)
 
 	return user, err
