@@ -4,3 +4,4 @@ logs
 docs/swagger.json
 docs/docs.go
 /db/data
+.env

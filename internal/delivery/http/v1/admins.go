@@ -19,6 +19,15 @@ func (h *Handler) initAdminsRoutes(api *gin.RouterGroup) {
 
 		authenticated := admins.Group("/", h.verifyAdmin)
 		{
+			categories := authenticated.Group("/categories")
+			{
+				categories.GET("/", h.getAllCategoryAdmin)
+				//categories.GET("/:id", h.getProductByIdAdmin)
+				categories.POST("/", h.createCategoryAdmin)
+				//categories.PUT("/:id", h.updateProductAdmin)
+				//categories.DELETE("/:id", h.deleteProductAdmin)
+			}
+
 			products := authenticated.Group("/products")
 			{
 				products.GET("/", h.getAllProductsAdmin)

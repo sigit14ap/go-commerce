@@ -15,4 +15,5 @@ type Category struct {
 	ID          primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 	Name        string             `json:"name" bson:"name"`
 	Description string             `json:"description" bson:"description"`
+	Icon        string             `json:"icon" bson:"icon"`
 }

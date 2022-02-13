@@ -1,6 +1,10 @@
 package main
 
-import "github.com/sigit14ap/go-commerce/internal/app"
+import (
+	"github.com/joho/godotenv"
+	"github.com/sigit14ap/go-commerce/internal/app"
+	log "github.com/sirupsen/logrus"
+)
 
 // @title        E-commerce API
 // @version      1.0
@@ -21,5 +25,11 @@ import "github.com/sigit14ap/go-commerce/internal/app"
 // @in                          header
 // @name                        Authorization
 func main() {
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	app.Run("config/config.yml")
 }

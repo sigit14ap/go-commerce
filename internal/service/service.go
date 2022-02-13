@@ -75,14 +75,24 @@ type Payment interface {
 	GetPaymentLink(ctx context.Context, orderID primitive.ObjectID) (string, error)
 }
 
+type Categories interface {
+	FindAll(ctx context.Context) ([]domain.Category, error)
+	FindByID(ctx context.Context, categoryID primitive.ObjectID) (domain.Category, error)
+	Create(ctx context.Context, categoryDTO dto.CreateCategoryDTO) (domain.Category, error)
+	Update(ctx context.Context, categoryDTO dto.UpdateCategoryDTO,
+		categoryID primitive.ObjectID) (domain.Category, error)
+	Delete(ctx context.Context, categoryID primitive.ObjectID) error
+}
+
 type Services struct {
-	Users    Users
-	Products Products
-	Reviews  Reviews
-	Admins   Admins
-	Carts    Carts
-	Orders   Orders
-	Payment  Payment
+	Users      Users
+	Products   Products
+	Reviews    Reviews
+	Admins     Admins
+	Carts      Carts
+	Orders     Orders
+	Payment    Payment
+	Categories Categories
 }
 
 type Deps struct {
@@ -98,15 +108,17 @@ func NewServices(deps Deps) *Services {
 	cartsService := NewCartsService(deps.Repos.Carts, productsService)
 	usersService := NewUsersService(deps.Repos.Users, cartsService)
 	ordersService := NewOrdersService(deps.Repos.Orders, productsService, cartsService)
+	CategoriesService := NewCategoriesService(deps.Repos.Categories)
 	// paymentService := NewPaymentService(ordersService, productsService)
 
 	return &Services{
-		Users:    usersService,
-		Products: productsService,
-		Reviews:  reviewsService,
-		Admins:   adminsService,
-		Carts:    cartsService,
-		Orders:   ordersService,
+		Users:      usersService,
+		Products:   productsService,
+		Reviews:    reviewsService,
+		Admins:     adminsService,
+		Carts:      cartsService,
+		Orders:     ordersService,
+		Categories: CategoriesService,
 		// Payment:  paymentService,
 	}
 }

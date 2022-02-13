@@ -47,10 +47,12 @@ func errorResponse(c *gin.Context, statusCode int, message string) {
 	}})
 }
 
-func errorValidationResponse(c *gin.Context, statusCode int, err error) {
-	// log.Error(message)
-	c.AbortWithStatusJSON(statusCode, failureValidation{Error: failureInfoValidation{
-		Code:    statusCode,
-		Message: err,
-	}})
+func contains(s []string, str string) bool {
+	for _, v := range s {
+		if v == str {
+			return true
+		}
+	}
+
+	return false
 }

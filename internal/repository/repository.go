@@ -67,22 +67,33 @@ type Orders interface {
 	Delete(ctx context.Context, orderID primitive.ObjectID) error
 }
 
+type Categories interface {
+	FindAll(ctx context.Context) ([]domain.Category, error)
+	FindByID(ctx context.Context, categoryID primitive.ObjectID) (domain.Category, error)
+	Create(ctx context.Context, category domain.Category) (domain.Category, error)
+	Update(ctx context.Context, categoryInput dto.UpdateCategoryInput,
+		categoryID primitive.ObjectID) (domain.Category, error)
+	Delete(ctx context.Context, categoryID primitive.ObjectID) error
+}
+
 type Repositories struct {
-	Users    Users
-	Products Products
-	Reviews  Reviews
-	Admins   Admins
-	Carts    Carts
-	Orders   Orders
+	Users      Users
+	Products   Products
+	Reviews    Reviews
+	Admins     Admins
+	Carts      Carts
+	Orders     Orders
+	Categories Categories
 }
 
 func NewRepositories(db *mongo.Database) *Repositories {
 	return &Repositories{
-		Users:    NewUsersRepo(db),
-		Products: NewProductsRepo(db),
-		Reviews:  NewReviewsRepo(db),
-		Admins:   NewAdminsRepo(db),
-		Carts:    NewCartsRepo(db),
-		Orders:   NewOrdersRepo(db),
+		Users:      NewUsersRepo(db),
+		Products:   NewProductsRepo(db),
+		Reviews:    NewReviewsRepo(db),
+		Admins:     NewAdminsRepo(db),
+		Carts:      NewCartsRepo(db),
+		Orders:     NewOrdersRepo(db),
+		Categories: NewCategoriesRepo(db),
 	}
 }

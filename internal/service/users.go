@@ -62,7 +62,7 @@ func (u UsersService) Create(ctx context.Context, userDTO dto.CreateUserDTO) (do
 	hashPassword, err := HashPassword(userDTO.Password)
 
 	if err != nil {
-		return domain.User{}, fmt.Errorf("Failed to hash password")
+		return domain.User{}, err
 	}
 
 	return u.repo.Create(ctx, domain.User{

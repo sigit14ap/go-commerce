@@ -1,42 +1,54 @@
 package tests
 
 import (
-	"encoding/json"
-	"github.com/gin-gonic/gin"
-	"github.com/restuwahyu13/go-supertest/supertest"
-	v1 "github.com/sigit14ap/go-commerce/internal/delivery/http/v1"
-	"github.com/stretchr/testify/assert"
+	"github.com/gavv/httpexpect/v2"
+	v1 "github.com/sigit14ap/go-commerce/internal/delivery/http"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
 
 type Response struct {
-	StatusCode int         `json:"statusCode"`
-	Method     string      `json:"method"`
-	Message    string      `json:"message"`
-	Data       interface{} `json:"data"`
+	Data interface{} `json:"data"`
 }
 
-var router = v1.NewHandler()
+var h = v1.Handler{}
+var router = h.Init()
 
-func TestPostMethod(t *testing.T) {
-	test := supertest.NewSuperTest(router, t)
+func TestSignUp(t *testing.T) {
 
-	payload := gin.H{
-		"name": "tes",
+	server := httptest.NewServer(router)
+	defer server.Close()
+
+	e := httpexpect.New(t, server.URL)
+
+	payload := map[string]interface{}{
+		"name":     "foo",
+		"email":    "foo@gmail.com",
+		"password": "bar",
 	}
 
-	test.Post("/")
-	test.Send(payload)
-	test.Set("Content-Type", "application/json")
-	test.End(func(req *http.Request, rr *httptest.ResponseRecorder) {
+	e.POST("/api/v1/users/auth/sign-up").
+		WithJSON(payload).
+		Expect().
+		Status(http.StatusCreated).
+		JSON().Object().ContainsKey("weight").ValueEqual("weight", 100)
 
-		var response Response
-		json.Unmarshal(rr.Body.Bytes(), &response)
-
-		assert.Equal(t, http.StatusOK, rr.Code)
-		assert.Equal(t, req.Method, req.Method)
-		assert.Equal(t, "fetch request using post method", response.Message)
-	})
+	//test := supertest.NewSuperTest(router, t)
+	//
+	//payload := map[string]interface{}{
+	//	"name":     "foo",
+	//	"email":    "foo@gmail.com",
+	//	"password": "bar",
+	//}
+	//
+	//test.Post("/api/v1/users/auth/sign-up")
+	//test.Send(payload)
+	//test.Set("Content-Type", "application/json")
+	//test.End(func(req *http.Request, rr *httptest.ResponseRecorder) {
+	//	//var response Response
+	//	//json.Unmarshal(rr.Body.Bytes(), &response)
+	//
+	//	assert.Equal(t, http.StatusCreated, rr.Code)
+	//})
 }

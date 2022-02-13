@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"github.com/sigit14ap/go-commerce/pkg/storage"
 	"net/http"
 	"time"
 
@@ -48,7 +49,8 @@ func Run(configPath string) {
 		RedisClient: redisClient,
 	})
 
-	handlers := delivery.NewHandler(services, tokenProvider)
+	storageProvider := storage.NewStorageProvider(cfg)
+	handlers := delivery.NewHandler(services, tokenProvider, storageProvider)
 	log.Info("Services, repositories and handlers initialized")
 
 	server := &http.Server{

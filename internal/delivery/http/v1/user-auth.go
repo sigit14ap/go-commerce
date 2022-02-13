@@ -4,19 +4,17 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-playground/validator/v10"
+	"github.com/sigit14ap/go-commerce/internal/domain"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"github.com/sigit14ap/go-commerce/internal/domain"
 	"github.com/sigit14ap/go-commerce/internal/domain/dto"
 	"github.com/sigit14ap/go-commerce/pkg/auth"
 	log "github.com/sirupsen/logrus"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
-
-var validate *validator.Validate = validator.New()
 
 // UserSignIn godoc
 // @Summary  User sign-in
@@ -89,8 +87,7 @@ func (h *Handler) userSignUp(context *gin.Context) {
 	if err != nil {
 
 		for _, fieldErr := range err.(validator.ValidationErrors) {
-			log.Error(fieldErr)
-			errorResponse(context, http.StatusBadRequest, fmt.Sprintf(fieldErr.Error()))
+			errorResponse(context, http.StatusUnprocessableEntity, fmt.Sprintf(fieldErr.Error()))
 			return // exit on first error
 		}
 	}
@@ -110,6 +107,7 @@ func (h *Handler) userSignUp(context *gin.Context) {
 		Password: signUpDTO.Password,
 		CartID:   cartID,
 	})
+
 	if err != nil {
 		if mongo.IsDuplicateKeyError(err) {
 			errorResponse(context, http.StatusInternalServerError,
@@ -124,6 +122,7 @@ func (h *Handler) userSignUp(context *gin.Context) {
 		Name:  user.Name,
 		Email: user.Email,
 	})
+	return
 }
 
 // UserRefresh godoc
