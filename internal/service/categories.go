@@ -34,6 +34,7 @@ func (service *CategoriesService) Create(ctx context.Context, category dto.Creat
 	return service.repo.Create(ctx, domain.Category{
 		Name:        category.Name,
 		Description: category.Description,
+		Icon:        category.Icon,
 	})
 }
 
@@ -41,6 +42,7 @@ func (service *CategoriesService) Update(ctx context.Context, categoryDTO dto.Up
 	return service.repo.Update(ctx, dto.UpdateCategoryInput{
 		Name:        categoryDTO.Name,
 		Description: categoryDTO.Description,
+		Icon:        categoryDTO.Icon,
 	}, categoryID)
 }
 

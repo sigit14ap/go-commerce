@@ -22,10 +22,10 @@ func (h *Handler) initAdminsRoutes(api *gin.RouterGroup) {
 			categories := authenticated.Group("/categories")
 			{
 				categories.GET("/", h.getAllCategoryAdmin)
-				//categories.GET("/:id", h.getProductByIdAdmin)
+				categories.GET("/:id", h.getCategoryByIdAdmin)
 				categories.POST("/", h.createCategoryAdmin)
-				//categories.PUT("/:id", h.updateProductAdmin)
-				//categories.DELETE("/:id", h.deleteProductAdmin)
+				categories.PUT("/:id", h.updateCategoryAdmin)
+				categories.DELETE("/:id", h.deleteCategoryAdmin)
 			}
 
 			products := authenticated.Group("/products")

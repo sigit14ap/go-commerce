@@ -46,8 +46,12 @@ func (repo CategoriesRepo) Update(ctx context.Context, categoryInput dto.UpdateC
 		updateQuery["name"] = categoryInput.Name
 	}
 
-	if categoryInput.Description != nil {
+	if categoryInput.Description != "" {
 		updateQuery["description"] = categoryInput.Description
+	}
+
+	if categoryInput.Icon != "" {
+		updateQuery["icon"] = categoryInput.Icon
 	}
 
 	_, err := repo.db.UpdateOne(ctx, bson.M{"_id": categoryID}, bson.M{"$set": updateQuery})

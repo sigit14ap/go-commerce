@@ -2,20 +2,31 @@ package dto
 
 import "mime/multipart"
 
-type CreateCategoryDTO struct {
+type ValidationCategoryDTO struct {
 	Name        string                `form:"name" binding:"required"`
 	Description string                `form:"description" binding:"required"`
 	Icon        *multipart.FileHeader `form:"icon" binding:"required"`
 }
 
+type ValidationUpdateCategoryDTO struct {
+	Name        string `form:"name" binding:"required"`
+	Description string `form:"description" binding:"required"`
+}
+
+type CreateCategoryDTO struct {
+	Name        string
+	Description string
+	Icon        string
+}
+
 type UpdateCategoryDTO struct {
-	Name        string                `form:"name"`
-	Description *string               `form:"description"`
-	Icon        *multipart.FileHeader `form:"icon" binding:"required"`
+	Name        string
+	Description string
+	Icon        string
 }
 
 type UpdateCategoryInput struct {
 	Name        string
-	Description *string
-	Icon        *multipart.FileHeader
+	Description string
+	Icon        string
 }
