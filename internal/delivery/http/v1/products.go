@@ -3,12 +3,15 @@ package v1
 import (
 	"errors"
 	"fmt"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/sigit14ap/go-commerce/internal/domain"
 	"github.com/sigit14ap/go-commerce/internal/domain/dto"
+	log "github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"net/http"
+	"path/filepath"
 )
 
 //TODO: add product search by query
@@ -206,11 +209,49 @@ func (h *Handler) getProductByIdAdmin(context *gin.Context) {
 // @Router    /admins/products [post]
 func (h *Handler) createProductAdmin(context *gin.Context) {
 	var productDTO dto.CreateProductDTO
-	err := context.BindJSON(&productDTO)
+	err := context.ShouldBindWith(&productDTO, binding.FormMultipart)
 	if err != nil {
 		errorResponse(context, http.StatusBadRequest, "invalid input body")
 		return
 	}
+
+	categoryID, err := primitive.ObjectIDFromHex(productDTO.CategoryID)
+	if err != nil {
+		errorResponse(context, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	_, err = h.services.Categories.FindByID(context.Request.Context(), categoryID)
+	if err != nil {
+		errorResponse(context, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	form, _ := context.MultipartForm()
+	files := form.File["images[][image]"]
+
+	if len(files) == 0 {
+		errorResponse(context, http.StatusBadRequest, "images required")
+		return
+	}
+
+	var imagesArray []string
+
+	for _, file := range files {
+
+		allowedExt := []string{".jpg", ".png", "jpeg"}
+		isContains := contains(allowedExt, filepath.Ext(file.Filename))
+
+		if !isContains {
+			errorResponse(context, http.StatusBadRequest, "Icon must be jpg, jpeg or png")
+			return
+		}
+
+		uploadedFile := h.storageProvider.Upload("Category", file)
+		imagesArray = append(imagesArray, uploadedFile)
+	}
+
+	productDTO.Images = imagesArray
 	product, err := h.services.Products.Create(context.Request.Context(), productDTO)
 	if err != nil {
 		errorResponse(context, http.StatusInternalServerError, err.Error())
@@ -237,7 +278,7 @@ func (h *Handler) createProductAdmin(context *gin.Context) {
 func (h *Handler) updateProductAdmin(context *gin.Context) {
 	var productDTO dto.UpdateProductDTO
 
-	err := context.BindJSON(&productDTO)
+	err := context.ShouldBindWith(&productDTO, binding.FormMultipart)
 	if err != nil {
 		errorResponse(context, http.StatusBadRequest, "invalid input body")
 		return
@@ -248,6 +289,43 @@ func (h *Handler) updateProductAdmin(context *gin.Context) {
 		errorResponse(context, http.StatusBadRequest, err.Error())
 		return
 	}
+
+	categoryID, err := primitive.ObjectIDFromHex(productDTO.CategoryID)
+	if err != nil {
+		errorResponse(context, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	_, err = h.services.Categories.FindByID(context.Request.Context(), categoryID)
+	if err != nil {
+		errorResponse(context, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	log.Info(context.Request.PostForm["images"])
+	form, _ := context.MultipartForm()
+	files := form.File["images[]"]
+	log.Info(files)
+	//if len(files) == 0 {
+	//	errorResponse(context, http.StatusBadRequest, "images required")
+	//	return
+	//}
+	//
+	//var imagesArray []string
+	//
+	//for _, file := range files {
+	//
+	//	allowedExt := []string{".jpg", ".png", "jpeg"}
+	//	isContains := contains(allowedExt, filepath.Ext(file.Filename))
+	//
+	//	if !isContains {
+	//		errorResponse(context, http.StatusBadRequest, "Icon must be jpg, jpeg or png")
+	//		return
+	//	}
+	//
+	//	uploadedFile := h.storageProvider.Upload("Category", file)
+	//	imagesArray = append(imagesArray, uploadedFile)
+	//}
 
 	product, err := h.services.Products.Update(context.Request.Context(), productDTO, productID)
 	if err != nil {

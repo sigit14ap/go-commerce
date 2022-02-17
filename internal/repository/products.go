@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-
 	"github.com/sigit14ap/go-commerce/internal/domain"
 	"github.com/sigit14ap/go-commerce/internal/domain/dto"
 	"go.mongodb.org/mongo-driver/bson"
@@ -35,7 +34,18 @@ func (p ProductsRepo) FindByID(ctx context.Context, productID primitive.ObjectID
 }
 
 func (p ProductsRepo) Create(ctx context.Context, product domain.Product) (domain.Product, error) {
+
+	images := []domain.ProductImage{}
+
+	for _, image := range product.Images {
+		images = append(images, domain.ProductImage{
+			ID:    primitive.NewObjectID(),
+			Image: image.Image,
+		})
+	}
+
 	product.ID = primitive.NewObjectID()
+	product.Images = images
 	_, err := p.db.InsertOne(ctx, product)
 	return product, err
 }
@@ -55,8 +65,8 @@ func (p ProductsRepo) Update(ctx context.Context, productInput dto.UpdateProduct
 		updateQuery["price"] = productInput.Price
 	}
 
-	if productInput.Categories != nil {
-		updateQuery["categories"] = productInput.Categories
+	if productInput.CategoryID != "" {
+		updateQuery["category_id"] = productInput.CategoryID
 	}
 
 	_, err := p.db.UpdateOne(ctx, bson.M{"_id": productID}, bson.M{"$set": updateQuery})

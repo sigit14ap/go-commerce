@@ -103,12 +103,12 @@ type Deps struct {
 
 func NewServices(deps Deps) *Services {
 	reviewsService := NewReviewsService(deps.Repos.Reviews, deps.RedisClient)
-	productsService := NewProductsService(deps.Repos.Products, reviewsService)
+	CategoriesService := NewCategoriesService(deps.Repos.Categories)
+	productsService := NewProductsService(deps.Repos.Products, reviewsService, CategoriesService)
 	adminsService := NewAdminsService(deps.Repos.Admins)
 	cartsService := NewCartsService(deps.Repos.Carts, productsService)
 	usersService := NewUsersService(deps.Repos.Users, cartsService)
 	ordersService := NewOrdersService(deps.Repos.Orders, productsService, cartsService)
-	CategoriesService := NewCategoriesService(deps.Repos.Categories)
 	// paymentService := NewPaymentService(ordersService, productsService)
 
 	return &Services{

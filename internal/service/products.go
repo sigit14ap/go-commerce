@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-
 	"github.com/sigit14ap/go-commerce/internal/domain"
 	"github.com/sigit14ap/go-commerce/internal/domain/dto"
 	"github.com/sigit14ap/go-commerce/internal/repository"
@@ -10,8 +9,9 @@ import (
 )
 
 type ProductsService struct {
-	repo           repository.Products
-	reviewsService Reviews
+	repo              repository.Products
+	reviewsService    Reviews
+	categoriesService Categories
 }
 
 func (p *ProductsService) FindAll(ctx context.Context) ([]domain.Product, error) {
@@ -22,6 +22,16 @@ func (p *ProductsService) FindAll(ctx context.Context) ([]domain.Product, error)
 
 	for i, product := range products {
 		products[i].TotalRating, err = p.reviewsService.GetTotalReviewRating(ctx, product.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		categoryID, err := primitive.ObjectIDFromHex(product.CategoryID)
+		if err != nil {
+			return nil, err
+		}
+
+		products[i].Category, err = p.categoriesService.FindByID(ctx, categoryID)
 		if err != nil {
 			return nil, err
 		}
@@ -42,11 +52,21 @@ func (p *ProductsService) FindByID(ctx context.Context, productID primitive.Obje
 }
 
 func (p *ProductsService) Create(ctx context.Context, product dto.CreateProductDTO) (domain.Product, error) {
+
+	var images []domain.ProductImage
+
+	for _, image := range product.Images {
+		images = append(images, domain.ProductImage{
+			Image: image,
+		})
+	}
+
 	return p.repo.Create(ctx, domain.Product{
 		Name:        product.Name,
 		Description: product.Description,
 		Price:       product.Price,
-		Categories:  product.Categories,
+		CategoryID:  product.CategoryID,
+		Images:      images,
 	})
 }
 
@@ -55,7 +75,7 @@ func (p *ProductsService) Update(ctx context.Context, productDTO dto.UpdateProdu
 		Name:        productDTO.Name,
 		Description: productDTO.Description,
 		Price:       productDTO.Price,
-		Categories:  productDTO.Categories,
+		CategoryID:  productDTO.CategoryID,
 	}, productID)
 }
 
@@ -67,9 +87,10 @@ func (p *ProductsService) Delete(ctx context.Context, productID primitive.Object
 	return p.reviewsService.DeleteByProductID(ctx, productID)
 }
 
-func NewProductsService(repo repository.Products, reviewsService Reviews) *ProductsService {
+func NewProductsService(repo repository.Products, reviewsService Reviews, categoriesService Categories) *ProductsService {
 	return &ProductsService{
-		repo:           repo,
-		reviewsService: reviewsService,
+		repo:              repo,
+		reviewsService:    reviewsService,
+		categoriesService: categoriesService,
 	}
 }
