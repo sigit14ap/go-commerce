@@ -3,8 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"time"
-
 	"github.com/sigit14ap/go-commerce/internal/domain"
 	"github.com/sigit14ap/go-commerce/internal/domain/dto"
 	"github.com/sigit14ap/go-commerce/internal/repository"
@@ -41,24 +39,6 @@ func (u *UsersService) FindUserInfo(ctx context.Context, userID primitive.Object
 }
 
 func (u UsersService) Create(ctx context.Context, userDTO dto.CreateUserDTO) (domain.User, error) {
-	var cartID primitive.ObjectID
-	expireTime := time.Now().Add(30 * time.Hour * 24)
-	if userDTO.CartID == primitive.NilObjectID {
-		cart, err := u.cartService.Create(ctx, dto.CreateCartDTO{
-			ExpireAt: expireTime,
-		})
-		if err != nil {
-			return domain.User{}, err
-		}
-		cartID = cart.ID
-	} else {
-		_, err := u.cartService.Update(ctx, dto.UpdateCartDTO{ExpireAt: &expireTime}, userDTO.CartID)
-		if err != nil {
-			return domain.User{}, err
-		}
-		cartID = userDTO.CartID
-	}
-
 	hashPassword, err := HashPassword(userDTO.Password)
 
 	if err != nil {
@@ -69,19 +49,17 @@ func (u UsersService) Create(ctx context.Context, userDTO dto.CreateUserDTO) (do
 		Name:     userDTO.Name,
 		Email:    userDTO.Email,
 		Password: hashPassword,
-		CartID:   cartID,
 	})
 }
 
 func (u *UsersService) Update(ctx context.Context, userDTO dto.UpdateUserDTO, userID primitive.ObjectID) (domain.User, error) {
 	return u.repo.Update(ctx, dto.UpdateUserInput{
-		Name:   userDTO.Name,
-		CartID: userDTO.CartID,
+		Name: userDTO.Name,
 	}, userID)
 }
 
 func (u *UsersService) Delete(ctx context.Context, userID primitive.ObjectID) error {
-	user, err := u.FindByID(ctx, userID)
+	_, err := u.FindByID(ctx, userID)
 	if err != nil {
 		return fmt.Errorf("not found user with id: %s", userID)
 	}
@@ -89,7 +67,7 @@ func (u *UsersService) Delete(ctx context.Context, userID primitive.ObjectID) er
 	if err != nil {
 		return err
 	}
-	return u.cartService.Delete(ctx, user.CartID)
+	return nil
 }
 
 func HashPassword(password string) (string, error) {

@@ -1,24 +1,17 @@
 package dto
 
-import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
-)
-
 type CreateUserDTO struct {
-	Name     string             `json:"name"`
-	Email    string             `json:"email" required:"true"`
-	Password string             `json:"password" required:"true"`
-	CartID   primitive.ObjectID `json:"cartID"`
+	Name     string `json:"name"`
+	Email    string `json:"email" required:"true"`
+	Password string `json:"password" required:"true"`
 }
 
 type UpdateUserDTO struct {
-	Name   string              `json:"name"`
-	CartID *primitive.ObjectID `json:"cartID"`
+	Name string `json:"name"`
 }
 
 type UpdateUserInput struct {
-	Name   string              `json:"name"`
-	CartID *primitive.ObjectID `json:"cartID"`
+	Name string `json:"name"`
 }
 
 type SignUpDTO struct {

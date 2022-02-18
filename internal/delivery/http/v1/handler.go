@@ -92,3 +92,16 @@ func getIdFromRequestContext(context *gin.Context, paramName string) (primitive.
 
 	return id, nil
 }
+
+func getIdFromRequest(paramName string) (primitive.ObjectID, error) {
+	if paramName == "" {
+		return primitive.ObjectID{}, errors.New("empty id param")
+	}
+
+	id, err := primitive.ObjectIDFromHex(paramName)
+	if err != nil {
+		return primitive.ObjectID{}, errors.New("invalid id param")
+	}
+
+	return id, nil
+}

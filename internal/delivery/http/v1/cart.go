@@ -3,19 +3,16 @@ package v1
 import (
 	"errors"
 	"fmt"
-	"net/http"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/sigit14ap/go-commerce/internal/domain"
 	"github.com/sigit14ap/go-commerce/internal/domain/dto"
-	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"net/http"
 )
 
 func (h *Handler) initCartRoutes(api *gin.RouterGroup) {
-	cart := api.Group("/cart", h.extractCartId)
+	cart := api.Group("/cart", h.verifyUser)
 	{
 		cart.GET("/", h.getCartItems)
 		cart.POST("/", h.createCartItem)
@@ -23,69 +20,6 @@ func (h *Handler) initCartRoutes(api *gin.RouterGroup) {
 		cart.PUT("/:productID", h.updateCartItem)
 		cart.DELETE("/:productID", h.deleteCartItem)
 	}
-}
-
-func (h *Handler) extractCartId(context *gin.Context) {
-	userID, err := h.extractIdFromAuthHeader(context, "userID")
-	if err == nil {
-		user, err := h.services.Users.FindByID(context.Request.Context(), userID)
-		if err != nil {
-			errorResponse(context, http.StatusInternalServerError,
-				fmt.Sprintf("user with id: %s not found", userID))
-			return
-		}
-
-		_, err = h.services.Carts.FindByID(context.Request.Context(), user.CartID)
-		if err != nil {
-			log.Warnf("user with id: %s don't have cart with id: %s", userID, user.CartID)
-
-			newCart, err := h.services.Carts.Create(context.Request.Context(), dto.CreateCartDTO{
-				ExpireAt: time.Now().Add(30 * time.Hour * 24),
-			})
-			if err != nil {
-				errorResponse(context, http.StatusInternalServerError, err.Error())
-				return
-			}
-			user.CartID = newCart.ID
-
-			_, err = h.services.Users.Update(context, dto.UpdateUserDTO{CartID: &user.CartID}, userID)
-			if err != nil {
-				errorResponse(context, http.StatusInternalServerError, err.Error())
-				return
-			}
-		}
-		context.Set("cartID", user.CartID)
-		return
-	}
-	log.Warnf("user not authenticated")
-
-	cartIDHex, err := context.Cookie("cartID")
-	if err == nil {
-		cartID, err := primitive.ObjectIDFromHex(cartIDHex)
-		if err == nil {
-			_, err = h.services.Carts.FindByID(context.Request.Context(), cartID)
-			if err == nil {
-				context.Set("cartID", cartID)
-				return
-			} else {
-				log.Warnf("cart with id: %s not found in db", cartIDHex)
-			}
-		} else {
-			log.Warnf("failed to convert cookie %s to objectID", cartIDHex)
-		}
-	}
-	log.Warn("cartID cookie not found")
-
-	newCart, err := h.services.Carts.Create(context.Request.Context(), dto.CreateCartDTO{
-		ExpireAt: time.Now().Add(1 * time.Hour * 24),
-	})
-	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
-		return
-	}
-	context.Set("cartID", newCart.ID)
-	context.SetCookie("cartID", newCart.ID.Hex(), int(time.Second.Seconds())*60*60*12,
-		"/", "localhost", false, true)
 }
 
 // GetCartItems godoc
@@ -100,14 +34,13 @@ func (h *Handler) extractCartId(context *gin.Context) {
 // @Failure  500     {object}  failure
 // @Router   /cart [get]
 func (h *Handler) getCartItems(context *gin.Context) {
-	cartIDHex, ok := context.Get("cartID")
-	if !ok {
-		errorResponse(context, http.StatusInternalServerError, "failed to get cart id")
+	userID, err := getIdFromRequestContext(context, "userID")
+	if err != nil {
+		errorResponse(context, http.StatusUnauthorized, err.Error())
 		return
 	}
-	cartID := cartIDHex.(primitive.ObjectID)
 
-	cartItems, err := h.services.Carts.FindCartItems(context, cartID)
+	cartItems, err := h.services.Carts.FindCartItems(context, userID)
 	if err != nil {
 		errorResponse(context, http.StatusInternalServerError, err.Error())
 		return
@@ -130,21 +63,31 @@ func (h *Handler) getCartItems(context *gin.Context) {
 // @Failure  500       {object}  failure
 // @Router   /cart [post]
 func (h *Handler) createCartItem(context *gin.Context) {
-	cartIDHex, ok := context.Get("cartID")
-	if !ok {
-		errorResponse(context, http.StatusInternalServerError, "failed to get cart id")
+	userID, err := getIdFromRequestContext(context, "userID")
+	if err != nil {
+		errorResponse(context, http.StatusUnauthorized, err.Error())
 		return
 	}
-	cartID := cartIDHex.(primitive.ObjectID)
 
-	var cartItemInput domain.CartItem
-	err := context.BindJSON(&cartItemInput)
+	var cartItemInput dto.AddToCartDTO
+	err = context.BindJSON(&cartItemInput)
 	if err != nil {
 		errorResponse(context, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
-	cartItem, err := h.services.Carts.AddCartItem(context, cartItemInput, cartID)
+	productID, err := getIdFromRequest(cartItemInput.ProductID)
+	if err != nil {
+		errorResponse(context, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	cartData := domain.CartItem{
+		ProductID: productID,
+		Quantity:  cartItemInput.Quantity,
+	}
+
+	cartItem, err := h.services.Carts.AddCartItem(context, cartData, userID)
 	if err != nil {
 		errorResponse(context, http.StatusInternalServerError, err.Error())
 		return
@@ -168,12 +111,11 @@ func (h *Handler) createCartItem(context *gin.Context) {
 // @Failure  500     {object}  failure
 // @Router   /cart/{productID} [put]
 func (h *Handler) updateCartItem(context *gin.Context) {
-	cartIDHex, ok := context.Get("cartID")
-	if !ok {
-		errorResponse(context, http.StatusInternalServerError, "failed to get cart id")
+	userID, err := getIdFromRequestContext(context, "userID")
+	if err != nil {
+		errorResponse(context, http.StatusUnauthorized, err.Error())
 		return
 	}
-	cartID := cartIDHex.(primitive.ObjectID)
 
 	productID, err := getIdFromPath(context, "productID")
 	if err != nil {
@@ -191,7 +133,7 @@ func (h *Handler) updateCartItem(context *gin.Context) {
 	cartItem, err := h.services.Carts.UpdateCartItem(context, domain.CartItem{
 		ProductID: productID,
 		Quantity:  cartItemInput.Quantity,
-	}, cartID)
+	}, userID)
 	if err != nil {
 		errorResponse(context, http.StatusInternalServerError, err.Error())
 		return

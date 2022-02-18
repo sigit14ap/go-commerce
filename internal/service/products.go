@@ -48,6 +48,16 @@ func (p *ProductsService) FindByID(ctx context.Context, productID primitive.Obje
 
 	product.TotalRating, err = p.reviewsService.GetTotalReviewRating(ctx, productID)
 
+	categoryID, err := primitive.ObjectIDFromHex(product.CategoryID)
+	if err != nil {
+		return domain.Product{}, err
+	}
+
+	product.Category, err = p.categoriesService.FindByID(ctx, categoryID)
+	if err != nil {
+		return domain.Product{}, err
+	}
+
 	return product, err
 }
 

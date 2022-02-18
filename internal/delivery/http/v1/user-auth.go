@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/go-playground/validator/v10"
 	"github.com/sigit14ap/go-commerce/internal/domain"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
@@ -92,20 +91,10 @@ func (h *Handler) userSignUp(context *gin.Context) {
 		}
 	}
 
-	var cartID primitive.ObjectID
-	cartIDHex, err := context.Cookie("cartID")
-	if err == nil {
-		cartID, err = primitive.ObjectIDFromHex(cartIDHex)
-		if err != nil {
-			log.Warnf("failed to convert cart id %s to object id", cartIDHex)
-		}
-	}
-
 	user, err := h.services.Users.Create(context, dto.CreateUserDTO{
 		Name:     signUpDTO.Name,
 		Email:    signUpDTO.Email,
 		Password: signUpDTO.Password,
-		CartID:   cartID,
 	})
 
 	if err != nil {

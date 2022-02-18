@@ -61,20 +61,61 @@ func (c *CartService) FindByID(ctx context.Context, cartID primitive.ObjectID) (
 	return cart, nil
 }
 
-func (c *CartService) FindCartItems(ctx context.Context, cartID primitive.ObjectID) ([]domain.CartItem, error) {
-	return c.repo.FindCartItems(ctx, cartID)
+func (c *CartService) FindCartItems(ctx context.Context, userID primitive.ObjectID) ([]domain.CartItem, error) {
+	cartItems, err := c.repo.FindCartItems(ctx, userID)
+
+	if err != nil {
+		return []domain.CartItem{}, err
+	}
+
+	var itemList []domain.CartItem
+
+	for _, item := range cartItems {
+		product, err := c.productService.FindByID(ctx, item.ProductID)
+
+		if err != nil {
+			return []domain.CartItem{}, err
+		}
+
+		itemList = append(itemList, domain.CartItem{
+			Quantity:  item.Quantity,
+			ProductID: item.ProductID,
+			Product:   product,
+		})
+	}
+
+	return itemList, nil
 }
 
-func (c *CartService) AddCartItem(ctx context.Context, cartItem domain.CartItem, cartID primitive.ObjectID) (domain.CartItem, error) {
-	return c.repo.AddCartItem(ctx, cartItem, cartID)
+func (c *CartService) AddCartItem(ctx context.Context, cartItem domain.CartItem, userID primitive.ObjectID) (domain.CartItem, error) {
+
+	product, err := c.productService.FindByID(ctx, cartItem.ProductID)
+
+	if err != nil {
+		return domain.CartItem{}, err
+	}
+
+	cartItem.Product = product
+
+	_, err = c.repo.AddCartItem(ctx, cartItem, userID)
+	return cartItem, err
 }
 
-func (c *CartService) UpdateCartItem(ctx context.Context, cartItem domain.CartItem, cartID primitive.ObjectID) (domain.CartItem, error) {
-	return c.repo.UpdateCartItem(ctx, cartItem, cartID)
+func (c *CartService) UpdateCartItem(ctx context.Context, cartItem domain.CartItem, userID primitive.ObjectID) (domain.CartItem, error) {
+	product, err := c.productService.FindByID(ctx, cartItem.ProductID)
+
+	if err != nil {
+		return domain.CartItem{}, err
+	}
+
+	cartItem.Product = product
+
+	_, err = c.repo.UpdateCartItem(ctx, cartItem, userID)
+	return cartItem, err
 }
 
-func (c *CartService) DeleteCartItem(ctx context.Context, productID primitive.ObjectID, cartID primitive.ObjectID) error {
-	return c.repo.DeleteCartItem(ctx, productID, cartID)
+func (c *CartService) DeleteCartItem(ctx context.Context, productID primitive.ObjectID, userID primitive.ObjectID) error {
+	return c.repo.DeleteCartItem(ctx, productID, userID)
 }
 
 func (c *CartService) ClearCart(ctx context.Context, cartID primitive.ObjectID) error {
@@ -83,14 +124,12 @@ func (c *CartService) ClearCart(ctx context.Context, cartID primitive.ObjectID) 
 
 func (c *CartService) Create(ctx context.Context, cartDTO dto.CreateCartDTO) (domain.Cart, error) {
 	return c.repo.Create(ctx, domain.Cart{
-		ExpireAt:  cartDTO.ExpireAt,
 		CartItems: cartDTO.CartItems,
 	})
 }
 
 func (c *CartService) Update(ctx context.Context, cartDTO dto.UpdateCartDTO, cartID primitive.ObjectID) (domain.Cart, error) {
 	return c.repo.Update(ctx, dto.UpdateCartInput{
-		ExpireAt:  cartDTO.ExpireAt,
 		CartItems: cartDTO.CartItems,
 	}, cartID)
 }
