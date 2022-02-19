@@ -27,8 +27,8 @@ func (c *CartsRepo) FindAll(ctx context.Context) ([]domain.Cart, error) {
 	return cartArray, err
 }
 
-func (c *CartsRepo) FindByID(ctx context.Context, cartID primitive.ObjectID) (domain.Cart, error) {
-	result := c.db.FindOne(ctx, bson.M{"_id": cartID})
+func (c *CartsRepo) FindByID(ctx context.Context, userID primitive.ObjectID) (domain.Cart, error) {
+	result := c.db.FindOne(ctx, bson.M{"userID": userID})
 
 	var cart domain.Cart
 	err := result.Decode(&cart)
@@ -61,17 +61,18 @@ func (c *CartsRepo) AddCartItem(ctx context.Context, cartItem domain.CartItem, u
 		cart, err = c.Create(ctx, tempCart)
 	}
 
-	result := c.db.FindOne(ctx, bson.M{"userID": userID, "cartItems.productID": cartItem.ProductID})
-	//result := c.db.FindOne(ctx, bson.M{"userID": userID})
-	log.Info(result)
-	var item domain.Cart
-	err = result.Decode(&item)
+	opts := options.FindOne().SetProjection(bson.M{"cartItems.$": 1})
+	result := c.db.FindOne(ctx, bson.M{"userID": userID, "cartItems": bson.M{"$elemMatch": bson.M{"productID": cartItem.ProductID}}}, opts)
 
-	if err != nil {
+	var cartData domain.Cart
+	_ = result.Decode(&cartData)
+
+	if len(cartData.CartItems) == 0 {
 		_, err := c.db.UpdateOne(ctx, bson.M{"userID": userID}, bson.M{"$addToSet": bson.M{"cartItems": cartItem}})
 		return cartItem, err
 	} else {
-		log.Info(item.Quantity)
+		item := cartData.CartItems[0]
+
 		quantity := item.Quantity + cartItem.Quantity
 		log.Infof("quantity : %s", quantity)
 		updateOptions := bson.M{"$set": bson.M{"cartItems.$.quantity": quantity}}
@@ -92,9 +93,9 @@ func (c *CartsRepo) DeleteCartItem(ctx context.Context, productID primitive.Obje
 	return err
 }
 
-func (c *CartsRepo) ClearCart(ctx context.Context, cartID primitive.ObjectID) error {
+func (c *CartsRepo) ClearCart(ctx context.Context, userID primitive.ObjectID) error {
 	emptyArray := make([]domain.CartItem, 0)
-	_, err := c.db.UpdateOne(ctx, bson.M{"_id": cartID}, bson.M{"$set": bson.M{"cartItems": emptyArray}})
+	_, err := c.db.UpdateOne(ctx, bson.M{"userID": userID}, bson.M{"$set": bson.M{"cartItems": emptyArray}})
 	return err
 }
 

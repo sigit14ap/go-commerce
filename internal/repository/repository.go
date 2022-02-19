@@ -45,7 +45,7 @@ type Admins interface {
 
 type Carts interface {
 	FindAll(ctx context.Context) ([]domain.Cart, error)
-	FindByID(ctx context.Context, cartID primitive.ObjectID) (domain.Cart, error)
+	FindByID(ctx context.Context, userID primitive.ObjectID) (domain.Cart, error)
 	FindCartItems(ctx context.Context, cartID primitive.ObjectID) ([]domain.CartItem, error)
 	AddCartItem(ctx context.Context, cartItem domain.CartItem, cartID primitive.ObjectID) (domain.CartItem, error)
 	UpdateCartItem(ctx context.Context, cartItem domain.CartItem, cartID primitive.ObjectID) (domain.CartItem, error)
@@ -76,6 +76,11 @@ type Categories interface {
 	Delete(ctx context.Context, categoryID primitive.ObjectID) error
 }
 
+type Areas interface {
+	GetProvinces(ctx context.Context) ([]domain.Province, error)
+	GetCities(ctx context.Context, cityListDTO dto.CityListDTO) ([]domain.City, error)
+}
+
 type Repositories struct {
 	Users      Users
 	Products   Products
@@ -84,6 +89,7 @@ type Repositories struct {
 	Carts      Carts
 	Orders     Orders
 	Categories Categories
+	Areas      Areas
 }
 
 func NewRepositories(db *mongo.Database) *Repositories {
@@ -95,5 +101,6 @@ func NewRepositories(db *mongo.Database) *Repositories {
 		Carts:      NewCartsRepo(db),
 		Orders:     NewOrdersRepo(db),
 		Categories: NewCategoriesRepo(db),
+		Areas:      NewAreasRepo(),
 	}
 }

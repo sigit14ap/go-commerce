@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sigit14ap/go-commerce/internal/domain"
 	"github.com/sigit14ap/go-commerce/internal/domain/dto"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"net/http"
 )
@@ -148,7 +147,6 @@ func (h *Handler) updateCartItem(context *gin.Context) {
 // @Accept   json
 // @Produce  json
 // @Param    productID  path      string  true  "product id"
-// @Param    Cookie  header    string  true  "cart id"
 // @Success  200        {object}  success
 // @Failure  400        {object}  failure
 // @Failure  401        {object}  failure
@@ -156,12 +154,11 @@ func (h *Handler) updateCartItem(context *gin.Context) {
 // @Failure  500        {object}  failure
 // @Router   /cart/{productID} [delete]
 func (h *Handler) deleteCartItem(context *gin.Context) {
-	cartIDHex, ok := context.Get("cartID")
-	if !ok {
-		errorResponse(context, http.StatusInternalServerError, "failed to get cart id")
+	userID, err := getIdFromRequestContext(context, "userID")
+	if err != nil {
+		errorResponse(context, http.StatusUnauthorized, err.Error())
 		return
 	}
-	cartID := cartIDHex.(primitive.ObjectID)
 
 	productID, err := getIdFromPath(context, "productID")
 	if err != nil {
@@ -169,13 +166,14 @@ func (h *Handler) deleteCartItem(context *gin.Context) {
 		return
 	}
 
-	err = h.services.Carts.DeleteCartItem(context, productID, cartID)
+	err = h.services.Carts.DeleteCartItem(context, productID, userID)
 	if err != nil {
 		errorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	context.Status(http.StatusOK)
+	var data interface{}
+	successResponse(context, data)
 }
 
 // ClearCart godoc
@@ -183,7 +181,6 @@ func (h *Handler) deleteCartItem(context *gin.Context) {
 // @Tags     cart
 // @Accept   json
 // @Produce  json
-// @Param    Cookie     header    string  true  "cart id"
 // @Success  200        {object}  success
 // @Failure  400        {object}  failure
 // @Failure  401        {object}  failure
@@ -191,20 +188,20 @@ func (h *Handler) deleteCartItem(context *gin.Context) {
 // @Failure  500        {object}  failure
 // @Router   /cart [delete]
 func (h *Handler) clearCart(context *gin.Context) {
-	cartIDHex, ok := context.Get("cartID")
-	if !ok {
-		errorResponse(context, http.StatusInternalServerError, "failed to get cart id")
+	userID, err := getIdFromRequestContext(context, "userID")
+	if err != nil {
+		errorResponse(context, http.StatusUnauthorized, err.Error())
 		return
 	}
-	cartID := cartIDHex.(primitive.ObjectID)
 
-	err := h.services.Carts.ClearCart(context, cartID)
+	err = h.services.Carts.ClearCart(context, userID)
 	if err != nil {
 		errorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	context.Status(http.StatusOK)
+	var data interface{}
+	successResponse(context, data)
 }
 
 // GetCarts godoc

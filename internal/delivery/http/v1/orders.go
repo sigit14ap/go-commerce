@@ -59,13 +59,7 @@ func (h *Handler) createOrder(context *gin.Context) {
 		return
 	}
 
-	user, err := h.services.Users.FindByID(context.Request.Context(), userID)
-	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	cart, err := h.services.Carts.FindByID(context.Request.Context(), user.ID)
+	cart, err := h.services.Carts.FindByID(context.Request.Context(), userID)
 	if err != nil {
 		errorResponse(context, http.StatusInternalServerError, err.Error())
 		return

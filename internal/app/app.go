@@ -50,6 +50,7 @@ func Run(configPath string) {
 	})
 
 	storageProvider := storage.NewStorageProvider(cfg)
+
 	handlers := delivery.NewHandler(services, tokenProvider, storageProvider)
 	log.Info("Services, repositories and handlers initialized")
 

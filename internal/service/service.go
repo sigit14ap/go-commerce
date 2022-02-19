@@ -49,12 +49,12 @@ type Admins interface {
 
 type Carts interface {
 	FindAll(ctx context.Context) ([]domain.Cart, error)
-	FindByID(ctx context.Context, cartID primitive.ObjectID) (domain.Cart, error)
+	FindByID(ctx context.Context, userID primitive.ObjectID) (domain.Cart, error)
 	FindCartItems(ctx context.Context, userID primitive.ObjectID) ([]domain.CartItem, error)
 	AddCartItem(ctx context.Context, cartItem domain.CartItem, userID primitive.ObjectID) (domain.CartItem, error)
 	UpdateCartItem(ctx context.Context, cartItem domain.CartItem, userID primitive.ObjectID) (domain.CartItem, error)
 	DeleteCartItem(ctx context.Context, productID primitive.ObjectID, userID primitive.ObjectID) error
-	ClearCart(ctx context.Context, cartID primitive.ObjectID) error
+	ClearCart(ctx context.Context, userID primitive.ObjectID) error
 	Create(ctx context.Context, cartDTO dto.CreateCartDTO) (domain.Cart, error)
 	Update(ctx context.Context, cartDTO dto.UpdateCartDTO,
 		cartID primitive.ObjectID) (domain.Cart, error)
@@ -84,6 +84,11 @@ type Categories interface {
 	Delete(ctx context.Context, categoryID primitive.ObjectID) error
 }
 
+type Areas interface {
+	GetProvinces(ctx context.Context) ([]domain.Province, error)
+	GetCities(ctx context.Context, cityListDTO dto.CityListDTO) ([]domain.City, error)
+}
+
 type Services struct {
 	Users      Users
 	Products   Products
@@ -93,6 +98,7 @@ type Services struct {
 	Orders     Orders
 	Payment    Payment
 	Categories Categories
+	Areas      Areas
 }
 
 type Deps struct {
@@ -109,6 +115,7 @@ func NewServices(deps Deps) *Services {
 	cartsService := NewCartsService(deps.Repos.Carts, productsService)
 	usersService := NewUsersService(deps.Repos.Users, cartsService)
 	ordersService := NewOrdersService(deps.Repos.Orders, productsService, cartsService)
+	areaService := NewAreasService(deps.Repos.Areas)
 	// paymentService := NewPaymentService(ordersService, productsService)
 
 	return &Services{
@@ -119,6 +126,7 @@ func NewServices(deps Deps) *Services {
 		Carts:      cartsService,
 		Orders:     ordersService,
 		Categories: CategoriesService,
+		Areas:      areaService,
 		// Payment:  paymentService,
 	}
 }

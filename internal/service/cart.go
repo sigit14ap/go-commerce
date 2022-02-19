@@ -39,8 +39,8 @@ func (c *CartService) FindAll(ctx context.Context) ([]domain.Cart, error) {
 	return carts, nil
 }
 
-func (c *CartService) FindByID(ctx context.Context, cartID primitive.ObjectID) (domain.Cart, error) {
-	cart, err := c.repo.FindByID(ctx, cartID)
+func (c *CartService) FindByID(ctx context.Context, userID primitive.ObjectID) (domain.Cart, error) {
+	cart, err := c.repo.FindByID(ctx, userID)
 	if err != nil {
 		return domain.Cart{}, err
 	}
@@ -118,8 +118,8 @@ func (c *CartService) DeleteCartItem(ctx context.Context, productID primitive.Ob
 	return c.repo.DeleteCartItem(ctx, productID, userID)
 }
 
-func (c *CartService) ClearCart(ctx context.Context, cartID primitive.ObjectID) error {
-	return c.repo.ClearCart(ctx, cartID)
+func (c *CartService) ClearCart(ctx context.Context, userID primitive.ObjectID) error {
+	return c.repo.ClearCart(ctx, userID)
 }
 
 func (c *CartService) Create(ctx context.Context, cartDTO dto.CreateCartDTO) (domain.Cart, error) {
