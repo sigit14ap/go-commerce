@@ -8,4 +8,5 @@ const (
 	cartsCollection      = "carts"
 	ordersCollection     = "orders"
 	categoriesCollection = "categories"
+	addressesCollection  = "addresses"
 )

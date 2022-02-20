@@ -89,6 +89,10 @@ type Areas interface {
 	GetCities(ctx context.Context, cityListDTO dto.CityListDTO) ([]domain.City, error)
 }
 
+type Addresses interface {
+	FindAll(ctx context.Context, userID primitive.ObjectID) ([]domain.Address, error)
+}
+
 type Services struct {
 	Users      Users
 	Products   Products
@@ -99,6 +103,7 @@ type Services struct {
 	Payment    Payment
 	Categories Categories
 	Areas      Areas
+	Addresses  Addresses
 }
 
 type Deps struct {
@@ -116,6 +121,7 @@ func NewServices(deps Deps) *Services {
 	usersService := NewUsersService(deps.Repos.Users, cartsService)
 	ordersService := NewOrdersService(deps.Repos.Orders, productsService, cartsService)
 	areaService := NewAreasService(deps.Repos.Areas)
+	addressService := NewAddressesService(deps.Repos.Addresses)
 	// paymentService := NewPaymentService(ordersService, productsService)
 
 	return &Services{
@@ -127,6 +133,7 @@ func NewServices(deps Deps) *Services {
 		Orders:     ordersService,
 		Categories: CategoriesService,
 		Areas:      areaService,
+		Addresses:  addressService,
 		// Payment:  paymentService,
 	}
 }

@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"github.com/go-playground/validator/v10"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -24,9 +25,14 @@ type failureInfo struct {
 	Message string `json:"message" example:"invalid request body"`
 }
 
+type dataValidation struct {
+	Key     string `json:"key"`
+	Message string `json:"message"`
+}
+
 type failureInfoValidation struct {
-	Code    int   `json:"code" example:"400"`
-	Message error `json:"error"  example:"invalid request body"`
+	Code int              `json:"code" example:"400"`
+	Data []dataValidation `json:"error"  example:"invalid request body"`
 }
 
 func successResponse(context *gin.Context, data interface{}) {
@@ -41,6 +47,23 @@ func errorResponse(c *gin.Context, statusCode int, message string) {
 	c.AbortWithStatusJSON(statusCode, failure{Error: failureInfo{
 		Code:    statusCode,
 		Message: message,
+	}})
+}
+
+func errorValidationResponse(c *gin.Context, err error) {
+
+	data := []dataValidation{}
+
+	for _, err := range err.(validator.ValidationErrors) {
+		data = append(data, dataValidation{
+			Key:     err.Field(),
+			Message: err.Tag(),
+		})
+	}
+
+	c.AbortWithStatusJSON(http.StatusUnprocessableEntity, failureValidation{Error: failureInfoValidation{
+		Code: http.StatusUnprocessableEntity,
+		Data: data,
 	}})
 }
 

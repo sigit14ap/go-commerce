@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -28,6 +29,21 @@ type provinceResponse struct {
 		Query   []query    `json:"query"`
 		Status  status     `json:"status"`
 		Results []Province `json:"results"`
+	} `json:"rajaongkir"`
+}
+
+type City struct {
+	ProvinceID string `json:"province_id"`
+	Province   string `json:"province"`
+	CityID     string `json:"city_id"`
+	City       string `json:"city_name"`
+}
+
+type cityResponse struct {
+	Rajaongkir struct {
+		Query   query  `json:"query"`
+		Status  status `json:"status"`
+		Results []City `json:"results"`
 	} `json:"rajaongkir"`
 }
 
@@ -99,23 +115,26 @@ func GetProvinces() ([]domain.Province, error) {
 
 func GetCities(cityListDTO dto.CityListDTO) ([]domain.City, error) {
 	var data interface{}
-	province, err := call("GET", "/province", data)
+	endpoint := "/city?province=" + strconv.Itoa(cityListDTO.ProvinceID)
+	cities, err := call("GET", endpoint, data)
 
 	if err != nil {
-		return []domain.Province{}, err
+		return []domain.City{}, err
 	}
 
-	var response provinceResponse
-	err = json.Unmarshal(province, &response)
+	var response cityResponse
+	err = json.Unmarshal(cities, &response)
 
-	var provinceList []domain.Province
+	cityList := []domain.City{}
 
-	for _, prov := range response.Rajaongkir.Results {
-		provinceList = append(provinceList, domain.Province{
-			ID:   prov.ProvinceID,
-			Name: prov.Province,
+	for _, city := range response.Rajaongkir.Results {
+		cityList = append(cityList, domain.City{
+			ID:           city.CityID,
+			Name:         city.City,
+			ProvinceID:   city.ProvinceID,
+			ProvinceName: city.Province,
 		})
 	}
 
-	return provinceList, err
+	return cityList, err
 }

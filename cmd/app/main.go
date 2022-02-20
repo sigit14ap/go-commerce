@@ -31,5 +31,10 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
+	//var param1 string
+	//flag.StringVar(&param1, "param1", "", "Parameter 1")
+	//flag.Parse()
+	//fmt.Print("Missing required parameter 1 : %s", param1)
+
 	app.Run("config/config.yml")
 }

@@ -81,6 +81,10 @@ type Areas interface {
 	GetCities(ctx context.Context, cityListDTO dto.CityListDTO) ([]domain.City, error)
 }
 
+type Addresses interface {
+	FindAll(ctx context.Context, userID primitive.ObjectID) ([]domain.Address, error)
+}
+
 type Repositories struct {
 	Users      Users
 	Products   Products
@@ -90,6 +94,7 @@ type Repositories struct {
 	Orders     Orders
 	Categories Categories
 	Areas      Areas
+	Addresses  Addresses
 }
 
 func NewRepositories(db *mongo.Database) *Repositories {
@@ -102,5 +107,6 @@ func NewRepositories(db *mongo.Database) *Repositories {
 		Orders:     NewOrdersRepo(db),
 		Categories: NewCategoriesRepo(db),
 		Areas:      NewAreasRepo(),
+		Addresses:  NewAddressesRepo(db),
 	}
 }
