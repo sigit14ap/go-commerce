@@ -11,6 +11,10 @@ type AreaService struct {
 	repo repository.Areas
 }
 
+func (area *AreaService) FindProvinceByThirdParty(ctx context.Context, provinceID string) (domain.Province, error) {
+	return area.repo.FindProvinceByThirdParty(ctx, provinceID)
+}
+
 func (area *AreaService) GetProvinces(ctx context.Context) ([]domain.Province, error) {
 	return area.repo.GetProvinces(ctx)
 }
@@ -19,7 +23,7 @@ func (area *AreaService) CreateProvinces(ctx context.Context, province domain.Pr
 	return area.repo.CreateProvinces(ctx, province)
 }
 
-func (area *AreaService) GetCities(ctx context.Context, cityListDTO dto.CityListDTO) ([]domain.City, error) {
+func (area *AreaService) GetCities(ctx context.Context, cityListDTO dto.CityListDTO) ([]dto.ThirdPartyCityDTO, error) {
 	return area.repo.GetCities(ctx, cityListDTO)
 }
 

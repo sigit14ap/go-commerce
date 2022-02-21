@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/sigit14ap/go-commerce/internal/config"
 	"github.com/sigit14ap/go-commerce/internal/domain"
+	"github.com/sigit14ap/go-commerce/internal/domain/dto"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -103,32 +104,32 @@ func GetProvinces() ([]domain.Province, error) {
 
 	for _, prov := range response.Rajaongkir.Results {
 		provinceList = append(provinceList, domain.Province{
-			ID:   prov.ProvinceID,
-			Name: prov.Province,
+			ThirdPartyID: prov.ProvinceID,
+			Name:         prov.Province,
 		})
 	}
 
 	return provinceList, err
 }
 
-func GetCities() ([]domain.City, error) {
+func GetCities() ([]dto.ThirdPartyCityDTO, error) {
 	var data interface{}
 	cities, err := call("GET", "/city", data)
 
 	if err != nil {
-		return []domain.City{}, err
+		return []dto.ThirdPartyCityDTO{}, err
 	}
 
 	var response cityResponse
 	err = json.Unmarshal(cities, &response)
 
-	cityList := []domain.City{}
+	cityList := []dto.ThirdPartyCityDTO{}
 
 	for _, city := range response.Rajaongkir.Results {
-		cityList = append(cityList, domain.City{
-			ID:         city.CityID,
+		cityList = append(cityList, dto.ThirdPartyCityDTO{
 			Name:       city.City,
 			ProvinceID: city.ProvinceID,
+			CityID:     city.CityID,
 		})
 	}
 

@@ -7,10 +7,10 @@ import (
 )
 
 func (h *Handler) initAreasRoutes(api *gin.RouterGroup) {
-	users := api.Group("/area")
+	area := api.Group("/area")
 	{
-		users.GET("/province", h.getProvince)
-		users.GET("/city", h.getCity)
+		area.GET("/province", h.getProvince)
+		area.GET("/city", h.getCity)
 	}
 }
 
@@ -44,12 +44,22 @@ func (h *Handler) getProvince(context *gin.Context) {
 // @Failure   500  {object}  failure
 // @Router    /area/city [get]
 func (h *Handler) getCity(context *gin.Context) {
-	var cityListDTO dto.CityListDTO
+	var cityListInput dto.CityListInput
 
-	err := context.BindJSON(&cityListDTO)
+	err := context.BindJSON(&cityListInput)
 	if err != nil {
 		errorResponse(context, http.StatusBadRequest, "invalid input body")
 		return
+	}
+
+	provinceID, err := getIdFromRequest(cityListInput.ProvinceID)
+	if err != nil {
+		errorResponse(context, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	cityListDTO := dto.CityListDTO{
+		ProvinceID: provinceID,
 	}
 
 	cities, err := h.services.Areas.GetCities(context, cityListDTO)

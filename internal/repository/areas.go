@@ -5,6 +5,7 @@ import (
 	"github.com/sigit14ap/go-commerce/internal/domain"
 	"github.com/sigit14ap/go-commerce/internal/domain/dto"
 	"github.com/sigit14ap/go-commerce/pkg/courier"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -13,8 +14,25 @@ type AreasRepo struct {
 	dbCity     *mongo.Collection
 }
 
+func (area *AreasRepo) FindProvinceByThirdParty(ctx context.Context, provinceID string) (domain.Province, error) {
+	result := area.dbProvince.FindOne(ctx, bson.M{"third_party_id": provinceID})
+
+	var province domain.Province
+	err := result.Decode(&province)
+
+	return province, err
+}
+
 func (area *AreasRepo) GetProvinces(ctx context.Context) ([]domain.Province, error) {
-	provinces, err := courier.GetProvinces()
+	provinces := []domain.Province{}
+
+	cursor, err := area.dbProvince.Find(ctx, bson.M{})
+	if err != nil {
+		return provinces, err
+	}
+
+	err = cursor.All(ctx, &provinces)
+
 	return provinces, err
 }
 
@@ -23,7 +41,7 @@ func (area *AreasRepo) CreateProvinces(ctx context.Context, province domain.Prov
 	return province, err
 }
 
-func (area *AreasRepo) GetCities(ctx context.Context, cityListDTO dto.CityListDTO) ([]domain.City, error) {
+func (area *AreasRepo) GetCities(ctx context.Context, cityListDTO dto.CityListDTO) ([]dto.ThirdPartyCityDTO, error) {
 	cities, err := courier.GetCities()
 	return cities, err
 }

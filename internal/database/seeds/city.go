@@ -2,6 +2,7 @@ package seeds
 
 import (
 	"context"
+	"github.com/sigit14ap/go-commerce/internal/domain"
 	"github.com/sigit14ap/go-commerce/internal/service"
 	"github.com/sigit14ap/go-commerce/pkg/courier"
 	log "github.com/sirupsen/logrus"
@@ -17,7 +18,20 @@ func (seeder *CitySeeder) Run(context context.Context) error {
 	cities, err := courier.GetCities()
 
 	for _, city := range cities {
-		_, err = seeder.services.Areas.CreateCity(context, city)
+
+		province, err := seeder.services.Areas.FindProvinceByThirdParty(context, city.ProvinceID)
+
+		if err != nil {
+			return err
+		}
+		
+		dataCity := domain.City{
+			ProvinceID:   province.ID,
+			ThirdPartyID: city.CityID,
+			Name:         city.Name,
+		}
+
+		_, err = seeder.services.Areas.CreateCity(context, dataCity)
 	}
 
 	return err
