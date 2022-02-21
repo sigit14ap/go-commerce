@@ -9,4 +9,6 @@ const (
 	ordersCollection     = "orders"
 	categoriesCollection = "categories"
 	addressesCollection  = "addresses"
+	provincesCollection  = "provinces"
+	citiesCollection     = "cities"
 )

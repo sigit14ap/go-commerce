@@ -78,7 +78,9 @@ type Categories interface {
 
 type Areas interface {
 	GetProvinces(ctx context.Context) ([]domain.Province, error)
+	CreateProvinces(ctx context.Context, province domain.Province) (domain.Province, error)
 	GetCities(ctx context.Context, cityListDTO dto.CityListDTO) ([]domain.City, error)
+	CreateCity(ctx context.Context, city domain.City) (domain.City, error)
 }
 
 type Addresses interface {
@@ -106,7 +108,7 @@ func NewRepositories(db *mongo.Database) *Repositories {
 		Carts:      NewCartsRepo(db),
 		Orders:     NewOrdersRepo(db),
 		Categories: NewCategoriesRepo(db),
-		Areas:      NewAreasRepo(),
+		Areas:      NewAreasRepo(db),
 		Addresses:  NewAddressesRepo(db),
 	}
 }

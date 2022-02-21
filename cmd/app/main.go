@@ -1,8 +1,10 @@
 package main
 
 import (
+	"flag"
 	"github.com/joho/godotenv"
 	"github.com/sigit14ap/go-commerce/internal/app"
+	"github.com/sigit14ap/go-commerce/internal/domain"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -31,10 +33,16 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	//var param1 string
-	//flag.StringVar(&param1, "param1", "", "Parameter 1")
-	//flag.Parse()
-	//fmt.Print("Missing required parameter 1 : %s", param1)
+	var seeds bool
 
-	app.Run("config/config.yml")
+	// flags declaration using flag package
+	flag.BoolVar(&seeds, "seeds", false, "Running seeders")
+
+	flag.Parse() // after declaring flags we need to call it
+
+	command := domain.Command{
+		Seeds: seeds,
+	}
+
+	app.Run("config/config.yml", command)
 }

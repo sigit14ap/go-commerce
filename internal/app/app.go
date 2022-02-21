@@ -3,6 +3,8 @@ package app
 import (
 	"context"
 	"fmt"
+	"github.com/sigit14ap/go-commerce/internal/database/seeds"
+	"github.com/sigit14ap/go-commerce/internal/domain"
 	"github.com/sigit14ap/go-commerce/pkg/storage"
 	"net/http"
 	"time"
@@ -18,7 +20,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func Run(configPath string) {
+func Run(configPath string, command domain.Command) {
 	log.Info("Application start ...")
 	log.Info("Logger initialized ...")
 
@@ -53,6 +55,11 @@ func Run(configPath string) {
 
 	handlers := delivery.NewHandler(services, tokenProvider, storageProvider)
 	log.Info("Services, repositories and handlers initialized")
+
+	seeder := seeds.NewDatabase(services)
+	if command.Seeds {
+		seeder.Run()
+	}
 
 	server := &http.Server{
 		Handler:      handlers.Init(),

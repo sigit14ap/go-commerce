@@ -4,11 +4,9 @@ import (
 	"encoding/json"
 	"github.com/sigit14ap/go-commerce/internal/config"
 	"github.com/sigit14ap/go-commerce/internal/domain"
-	"github.com/sigit14ap/go-commerce/internal/domain/dto"
 	"io/ioutil"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 )
 
@@ -113,10 +111,9 @@ func GetProvinces() ([]domain.Province, error) {
 	return provinceList, err
 }
 
-func GetCities(cityListDTO dto.CityListDTO) ([]domain.City, error) {
+func GetCities() ([]domain.City, error) {
 	var data interface{}
-	endpoint := "/city?province=" + strconv.Itoa(cityListDTO.ProvinceID)
-	cities, err := call("GET", endpoint, data)
+	cities, err := call("GET", "/city", data)
 
 	if err != nil {
 		return []domain.City{}, err
@@ -129,10 +126,9 @@ func GetCities(cityListDTO dto.CityListDTO) ([]domain.City, error) {
 
 	for _, city := range response.Rajaongkir.Results {
 		cityList = append(cityList, domain.City{
-			ID:           city.CityID,
-			Name:         city.City,
-			ProvinceID:   city.ProvinceID,
-			ProvinceName: city.Province,
+			ID:         city.CityID,
+			Name:       city.City,
+			ProvinceID: city.ProvinceID,
 		})
 	}
 
