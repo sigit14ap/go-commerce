@@ -69,10 +69,32 @@ func (h *Handler) createAddress(context *gin.Context) {
 		return
 	}
 
+	provinceID, err := getIdFromRequest(input.ProvinceID)
+
+	if err != nil {
+		errorResponse(context, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	cityID, err := getIdFromRequest(input.CityID)
+
+	if err != nil {
+		errorResponse(context, http.StatusBadRequest, err.Error())
+		return
+	}
+
 	addressDTO := dto.AddressDTO{}
 	copier.Copy(&addressDTO, &input)
 	addressDTO.UserID = userID
+	addressDTO.ProvinceID = provinceID
+	addressDTO.CityID = cityID
 
+	_, err = h.services.Areas.FindCityAndProvince(context, cityID, provinceID)
+
+	if err != nil {
+		errorResponse(context, http.StatusBadRequest, err.Error())
+		return
+	}
 	//cartItem, err := h.services.Carts.AddCartItem(context, cartData, userID)
 	//if err != nil {
 	//	errorResponse(context, http.StatusInternalServerError, err.Error())

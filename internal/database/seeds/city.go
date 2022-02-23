@@ -24,7 +24,7 @@ func (seeder *CitySeeder) Run(context context.Context) error {
 		if err != nil {
 			return err
 		}
-		
+
 		dataCity := domain.City{
 			ProvinceID:   province.ID,
 			ThirdPartyID: city.CityID,

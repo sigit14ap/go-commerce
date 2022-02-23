@@ -5,6 +5,7 @@ import (
 	"github.com/sigit14ap/go-commerce/internal/domain"
 	"github.com/sigit14ap/go-commerce/internal/domain/dto"
 	"github.com/sigit14ap/go-commerce/internal/repository"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type AreaService struct {
@@ -23,7 +24,11 @@ func (area *AreaService) CreateProvinces(ctx context.Context, province domain.Pr
 	return area.repo.CreateProvinces(ctx, province)
 }
 
-func (area *AreaService) GetCities(ctx context.Context, cityListDTO dto.CityListDTO) ([]dto.ThirdPartyCityDTO, error) {
+func (area *AreaService) FindCityAndProvince(ctx context.Context, cityID primitive.ObjectID, provinceID primitive.ObjectID) (domain.City, error) {
+	return area.repo.FindCityAndProvince(ctx, cityID, provinceID)
+}
+
+func (area *AreaService) GetCities(ctx context.Context, cityListDTO dto.CityListDTO) ([]domain.City, error) {
 	return area.repo.GetCities(ctx, cityListDTO)
 }
 

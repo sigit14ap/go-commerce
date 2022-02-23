@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/sigit14ap/go-commerce/internal/domain"
 	"github.com/sigit14ap/go-commerce/internal/domain/dto"
-	"github.com/sigit14ap/go-commerce/pkg/courier"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -41,8 +41,25 @@ func (area *AreasRepo) CreateProvinces(ctx context.Context, province domain.Prov
 	return province, err
 }
 
-func (area *AreasRepo) GetCities(ctx context.Context, cityListDTO dto.CityListDTO) ([]dto.ThirdPartyCityDTO, error) {
-	cities, err := courier.GetCities()
+func (area *AreasRepo) FindCityAndProvince(ctx context.Context, cityID primitive.ObjectID, provinceID primitive.ObjectID) (domain.City, error) {
+	result := area.dbCity.FindOne(ctx, bson.M{"_id": cityID, "province_id": provinceID})
+
+	var city domain.City
+	err := result.Decode(&city)
+
+	return city, err
+}
+
+func (area *AreasRepo) GetCities(ctx context.Context, cityListDTO dto.CityListDTO) ([]domain.City, error) {
+	cities := []domain.City{}
+
+	cursor, err := area.dbCity.Find(ctx, bson.M{"province_id": cityListDTO.ProvinceID})
+	if err != nil {
+		return cities, err
+	}
+
+	err = cursor.All(ctx, &cities)
+
 	return cities, err
 }
 
