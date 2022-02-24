@@ -78,16 +78,22 @@ type Categories interface {
 
 type Areas interface {
 	FindProvinceByThirdParty(ctx context.Context, provinceID string) (domain.Province, error)
+	FindProvince(ctx context.Context, provinceID primitive.ObjectID) (domain.Province, error)
 	GetProvinces(ctx context.Context) ([]domain.Province, error)
 	CreateProvinces(ctx context.Context, province domain.Province) (domain.Province, error)
 
 	FindCityAndProvince(ctx context.Context, cityID primitive.ObjectID, provinceID primitive.ObjectID) (domain.City, error)
+	FindCity(ctx context.Context, cityID primitive.ObjectID) (domain.City, error)
 	GetCities(ctx context.Context, cityListDTO dto.CityListDTO) ([]domain.City, error)
 	CreateCity(ctx context.Context, city domain.City) (domain.City, error)
 }
 
 type Addresses interface {
 	FindAll(ctx context.Context, userID primitive.ObjectID) ([]domain.Address, error)
+	Find(ctx context.Context, userID primitive.ObjectID, addressID primitive.ObjectID) (domain.Address, error)
+	Create(ctx context.Context, address dto.AddressDTO) (domain.Address, error)
+	Update(ctx context.Context, userID primitive.ObjectID, addressID primitive.ObjectID, address dto.AddressDTO) (domain.Address, error)
+	Delete(ctx context.Context, userID primitive.ObjectID, addressID primitive.ObjectID) error
 }
 
 type Repositories struct {

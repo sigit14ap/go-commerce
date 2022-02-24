@@ -74,7 +74,7 @@ func (c *CartsRepo) AddCartItem(ctx context.Context, cartItem domain.CartItem, u
 		item := cartData.CartItems[0]
 
 		quantity := item.Quantity + cartItem.Quantity
-		log.Infof("quantity : %s", quantity)
+
 		updateOptions := bson.M{"$set": bson.M{"cartItems.$.quantity": quantity}}
 		_, err := c.db.UpdateOne(ctx, bson.M{"userID": userID, "cartItems.productID": cartItem.ProductID}, updateOptions)
 		return cartItem, err

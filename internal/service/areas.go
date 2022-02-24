@@ -16,12 +16,20 @@ func (area *AreaService) FindProvinceByThirdParty(ctx context.Context, provinceI
 	return area.repo.FindProvinceByThirdParty(ctx, provinceID)
 }
 
+func (area *AreaService) FindProvince(ctx context.Context, provinceID primitive.ObjectID) (domain.Province, error) {
+	return area.repo.FindProvince(ctx, provinceID)
+}
+
 func (area *AreaService) GetProvinces(ctx context.Context) ([]domain.Province, error) {
 	return area.repo.GetProvinces(ctx)
 }
 
 func (area *AreaService) CreateProvinces(ctx context.Context, province domain.Province) (domain.Province, error) {
 	return area.repo.CreateProvinces(ctx, province)
+}
+
+func (area *AreaService) FindCity(ctx context.Context, cityID primitive.ObjectID) (domain.City, error) {
+	return area.repo.FindCity(ctx, cityID)
 }
 
 func (area *AreaService) FindCityAndProvince(ctx context.Context, cityID primitive.ObjectID, provinceID primitive.ObjectID) (domain.City, error) {

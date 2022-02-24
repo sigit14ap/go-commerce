@@ -3,16 +3,16 @@ package dto
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type AddressDTO struct {
-	UserID      primitive.ObjectID `json:"user_id"`
-	Fullname    string             `json:"fullname"`
-	PhoneNumber string             `json:"phone_number"`
-	ProvinceID  primitive.ObjectID `json:"province_id"`
-	CityID      primitive.ObjectID `json:"city_id"`
-	Address     string             `json:"address"`
-	Longitude   string             `json:"longitude"`
-	Latitude    string             `json:"latitude"`
-	Type        string             `json:"type"`
-	IsPrimary   bool               `json:"is_primary"`
+	UserID      primitive.ObjectID `json:"user_id" bson:"userId"`
+	Fullname    string             `json:"fullname" bson:"fullname"`
+	PhoneNumber string             `json:"phone_number" bson:"phoneNumber"`
+	ProvinceID  primitive.ObjectID `json:"province_id" bson:"provinceId"`
+	CityID      primitive.ObjectID `json:"city_id" bson:"cityId"`
+	Address     string             `json:"address" bson:"address"`
+	Longitude   string             `json:"longitude" bson:"longitude"`
+	Latitude    string             `json:"latitude" bson:"latitude"`
+	Type        string             `json:"type" bson:"type"`
+	IsPrimary   bool               `json:"is_primary" bson:"isPrimary"`
 }
 
 type AddressInput struct {

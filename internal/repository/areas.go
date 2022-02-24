@@ -23,6 +23,15 @@ func (area *AreasRepo) FindProvinceByThirdParty(ctx context.Context, provinceID 
 	return province, err
 }
 
+func (area *AreasRepo) FindProvince(ctx context.Context, provinceID primitive.ObjectID) (domain.Province, error) {
+	result := area.dbProvince.FindOne(ctx, bson.M{"_id": provinceID})
+
+	var province domain.Province
+	err := result.Decode(&province)
+
+	return province, err
+}
+
 func (area *AreasRepo) GetProvinces(ctx context.Context) ([]domain.Province, error) {
 	provinces := []domain.Province{}
 
@@ -43,6 +52,15 @@ func (area *AreasRepo) CreateProvinces(ctx context.Context, province domain.Prov
 
 func (area *AreasRepo) FindCityAndProvince(ctx context.Context, cityID primitive.ObjectID, provinceID primitive.ObjectID) (domain.City, error) {
 	result := area.dbCity.FindOne(ctx, bson.M{"_id": cityID, "province_id": provinceID})
+
+	var city domain.City
+	err := result.Decode(&city)
+
+	return city, err
+}
+
+func (area *AreasRepo) FindCity(ctx context.Context, cityID primitive.ObjectID) (domain.City, error) {
+	result := area.dbCity.FindOne(ctx, bson.M{"_id": cityID})
 
 	var city domain.City
 	err := result.Decode(&city)
