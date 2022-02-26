@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/sigit14ap/go-commerce/internal/database/seeds"
 	"github.com/sigit14ap/go-commerce/internal/domain"
+	"github.com/sigit14ap/go-commerce/pkg/courier"
 	"github.com/sigit14ap/go-commerce/pkg/storage"
 	"net/http"
 	"time"
@@ -53,10 +54,12 @@ func Run(configPath string, command domain.Command) {
 
 	storageProvider := storage.NewStorageProvider(cfg)
 
-	handlers := delivery.NewHandler(services, tokenProvider, storageProvider)
+	courierProvider := courier.NewCourierProvider()
+
+	handlers := delivery.NewHandler(services, tokenProvider, storageProvider, courierProvider)
 	log.Info("Services, repositories and handlers initialized")
 
-	seeder := seeds.NewDatabase(services)
+	seeder := seeds.NewDatabase(services, courierProvider)
 	if command.Seeds {
 		seeder.Run()
 	}

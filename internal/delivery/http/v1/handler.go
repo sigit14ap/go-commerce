@@ -3,6 +3,7 @@ package v1
 import (
 	"errors"
 	"fmt"
+	"github.com/sigit14ap/go-commerce/pkg/courier"
 	"github.com/sigit14ap/go-commerce/pkg/storage"
 	"math"
 	"net/http"
@@ -19,13 +20,15 @@ type Handler struct {
 	services        *service.Services
 	tokenProvider   auth.TokenProvider
 	storageProvider storage.StorageProvider
+	courierProvider courier.CourierProvider
 }
 
-func NewHandler(services *service.Services, tokenProvider auth.TokenProvider, storageProvider storage.StorageProvider) *Handler {
+func NewHandler(services *service.Services, tokenProvider auth.TokenProvider, storageProvider storage.StorageProvider, courierProvider courier.CourierProvider) *Handler {
 	return &Handler{
 		services:        services,
 		tokenProvider:   tokenProvider,
 		storageProvider: storageProvider,
+		courierProvider: courierProvider,
 	}
 }
 

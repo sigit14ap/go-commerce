@@ -2,7 +2,6 @@ package courier
 
 import (
 	"encoding/json"
-	"github.com/sigit14ap/go-commerce/internal/config"
 	"github.com/sigit14ap/go-commerce/internal/domain"
 	"github.com/sigit14ap/go-commerce/internal/domain/dto"
 	"io/ioutil"
@@ -48,16 +47,15 @@ type cityResponse struct {
 
 type CourierProvider interface {
 	GetProvinces() ([]domain.Province, error)
+	GetCities() ([]dto.ThirdPartyCityDTO, error)
+	GetDeliveryCost() ([]dto.ThirdPartyCityDTO, error)
 }
 
 type Provider struct {
-	cfg *config.Config
 }
 
-func NewCourierProvider(cfg *config.Config) *Provider {
-	return &Provider{
-		cfg: cfg,
-	}
+func NewCourierProvider() *Provider {
+	return &Provider{}
 }
 
 func call(method string, endpoint string, data interface{}) ([]byte, error) {
@@ -89,7 +87,7 @@ func call(method string, endpoint string, data interface{}) ([]byte, error) {
 	return body, err
 }
 
-func GetProvinces() ([]domain.Province, error) {
+func (p *Provider) GetProvinces() ([]domain.Province, error) {
 	var data interface{}
 	province, err := call("GET", "/province", data)
 
@@ -112,7 +110,7 @@ func GetProvinces() ([]domain.Province, error) {
 	return provinceList, err
 }
 
-func GetCities() ([]dto.ThirdPartyCityDTO, error) {
+func (p *Provider) GetCities() ([]dto.ThirdPartyCityDTO, error) {
 	var data interface{}
 	cities, err := call("GET", "/city", data)
 
@@ -134,4 +132,8 @@ func GetCities() ([]dto.ThirdPartyCityDTO, error) {
 	}
 
 	return cityList, err
+}
+
+func (p *Provider) GetDeliveryCost() ([]dto.ThirdPartyCityDTO, error) {
+	panic("implement me")
 }

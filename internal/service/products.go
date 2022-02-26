@@ -77,6 +77,7 @@ func (p *ProductsService) Create(ctx context.Context, product dto.CreateProductD
 		Price:       product.Price,
 		CategoryID:  product.CategoryID,
 		Images:      images,
+		Weight:      product.Weight,
 	})
 }
 

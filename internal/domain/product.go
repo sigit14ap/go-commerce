@@ -11,6 +11,7 @@ type Product struct {
 	CategoryID  string             `json:"-" bson:"category_id"`
 	Category    Category           `json:"category" bson:"-"`
 	Images      []ProductImage     `json:"images" bson:"images"`
+	Weight      int64              `json:"weight" bson:"weight"`
 }
 
 type ProductImage struct {

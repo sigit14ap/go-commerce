@@ -61,6 +61,10 @@ func (c *CartService) FindByID(ctx context.Context, userID primitive.ObjectID) (
 	return cart, nil
 }
 
+func (c *CartService) FindItem(ctx context.Context, userID primitive.ObjectID, productID primitive.ObjectID) (domain.CartItem, error) {
+	return c.repo.FindItem(ctx, userID, productID)
+}
+
 func (c *CartService) FindCartItems(ctx context.Context, userID primitive.ObjectID) ([]domain.CartItem, error) {
 	cartItems, err := c.repo.FindCartItems(ctx, userID)
 

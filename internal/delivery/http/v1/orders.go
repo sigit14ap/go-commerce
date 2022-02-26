@@ -9,7 +9,59 @@ import (
 )
 
 func (h *Handler) initOrdersRoutes(api *gin.RouterGroup) {
+	orders := api.Group("/users/orders", h.verifyUser)
+	{
+		orders.GET("/delivery-cost", h.getDeliveryCost)
+		orders.GET("/", h.getUserOrders)
+		orders.POST("/", h.createOrder)
+		orders.GET("/payment/:id", h.getOrderPaymentLink)
+	}
+}
 
+// GetDeliveryCost godoc
+// @Summary   Delivery cost List
+// @Tags      user
+// @Accept    json
+// @Produce   json
+// @Success   200  {array}   success
+// @Failure   401    {object}  failure
+// @Failure   404    {object}  failure
+// @Failure   500    {object}  failure
+// @Security  UserAuth
+// @Router    /users/orders/delivery-cost [get]
+func (h *Handler) getDeliveryCost(context *gin.Context) {
+	userID, err := getIdFromRequestContext(context, "userID")
+	if err != nil {
+		errorResponse(context, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	var input dto.DeliveryCostInput
+	_ = context.ShouldBindJSON(&input)
+
+	err = validate.Struct(input)
+	if err != nil {
+		errorValidationResponse(context, err)
+		return
+	}
+
+	for _, product := range input.Product {
+		productID, err := getIdFromRequest(product.ProductID)
+
+		if err != nil {
+			errorResponse(context, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		_, err = h.services.Carts.FindItem(context, userID, productID)
+
+		if err != nil {
+			errorResponse(context, http.StatusBadRequest, "Product id "+product.ProductID+" not found in cart")
+			return
+		}
+	}
+
+	successResponse(context, input)
 }
 
 // GerUserOrders godoc

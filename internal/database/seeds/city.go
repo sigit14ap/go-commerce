@@ -10,13 +10,13 @@ import (
 
 type CitySeeder struct {
 	services *service.Services
+	courier  *courier.Provider
 }
 
 func (seeder *CitySeeder) Run(context context.Context) error {
 	log.Warnf("City Seeder running ...")
 
-	cities, err := courier.GetCities()
-
+	cities, err := seeder.courier.GetCities()
 	for _, city := range cities {
 
 		province, err := seeder.services.Areas.FindProvinceByThirdParty(context, city.ProvinceID)
@@ -37,8 +37,9 @@ func (seeder *CitySeeder) Run(context context.Context) error {
 	return err
 }
 
-func NewCitySeeder(services *service.Services) *CitySeeder {
+func NewCitySeeder(services *service.Services, courier *courier.Provider) *CitySeeder {
 	return &CitySeeder{
 		services: services,
+		courier:  courier,
 	}
 }

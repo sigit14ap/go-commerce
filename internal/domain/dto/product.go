@@ -6,6 +6,7 @@ type CreateProductDTO struct {
 	Price       float64  `form:"price" binding:"required"`
 	CategoryID  string   `form:"category_id" binding:"required"`
 	Images      []string `form:"images"`
+	Weight      int64    `form:"weight" binding:"required"`
 }
 
 type UpdateProductDTO struct {
@@ -14,6 +15,7 @@ type UpdateProductDTO struct {
 	Price       *float64  `form:"price" binding:"required"`
 	CategoryID  string    `form:"category_id" binding:"required"`
 	Images      *[]string `form:"images"`
+	Weight      int64     `form:"weight" binding:"required"`
 }
 
 type UpdateProductInput struct {

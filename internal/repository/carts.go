@@ -45,6 +45,21 @@ func (c *CartsRepo) FindCartItems(ctx context.Context, userID primitive.ObjectID
 	return cart.CartItems, err
 }
 
+func (c *CartsRepo) FindItem(ctx context.Context, userID primitive.ObjectID, productID primitive.ObjectID) (domain.CartItem, error) {
+
+	opts := options.FindOne().SetProjection(bson.M{"cartItems.$": 1})
+	result := c.db.FindOne(ctx, bson.M{"userID": userID, "cartItems": bson.M{"$elemMatch": bson.M{"productID": productID}}}, opts)
+
+	var cart domain.Cart
+	err := result.Decode(&cart)
+
+	if len(cart.CartItems) == 0 {
+		return domain.CartItem{}, err
+	} else {
+		return cart.CartItems[0], err
+	}
+}
+
 func (c *CartsRepo) AddCartItem(ctx context.Context, cartItem domain.CartItem, userID primitive.ObjectID) (domain.CartItem, error) {
 
 	findCart := c.db.FindOne(ctx, bson.M{"userID": userID})

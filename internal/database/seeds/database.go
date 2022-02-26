@@ -3,6 +3,7 @@ package seeds
 import (
 	"context"
 	"github.com/sigit14ap/go-commerce/internal/service"
+	"github.com/sigit14ap/go-commerce/pkg/courier"
 )
 
 type Function interface {
@@ -20,9 +21,9 @@ func (seeds *DatabaseSeeder) Run() {
 	_ = seeds.City.Run(context)
 }
 
-func NewDatabase(services *service.Services) *DatabaseSeeder {
+func NewDatabase(services *service.Services, courier *courier.Provider) *DatabaseSeeder {
 	return &DatabaseSeeder{
-		Province: NewProvinceSeeder(services),
-		City:     NewCitySeeder(services),
+		Province: NewProvinceSeeder(services, courier),
+		City:     NewCitySeeder(services, courier),
 	}
 }

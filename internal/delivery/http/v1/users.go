@@ -16,12 +16,6 @@ func (h *Handler) initUsersRoutes(api *gin.RouterGroup) {
 		{
 			authenticated.GET("/account", h.getUserAccount)
 			authenticated.GET("/reviews", h.getAllReviewsUser)
-			orders := authenticated.Group("/orders")
-			{
-				orders.GET("/", h.getUserOrders)
-				orders.POST("/", h.createOrder)
-				orders.GET("/:id/payment", h.getOrderPaymentLink)
-			}
 		}
 	}
 }

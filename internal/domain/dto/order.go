@@ -22,3 +22,9 @@ type UpdateOrderInput struct {
 	DeliveredAt time.Time `json:"deliveredAt"`
 	Status      string    `json:"status"`
 }
+
+type DeliveryCostInput struct {
+	Product []struct {
+		ProductID string `json:"product_id" validate:"required"`
+	} `json:"product" validate:"required"`
+}
