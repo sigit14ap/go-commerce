@@ -11,4 +11,5 @@ const (
 	addressesCollection  = "addresses"
 	provincesCollection  = "provinces"
 	citiesCollection     = "cities"
+	storesCollection     = "stores"
 )

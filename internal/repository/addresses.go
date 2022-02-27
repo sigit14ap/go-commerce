@@ -70,7 +70,7 @@ func NewAddressesRepo(db *mongo.Database) *AddressesRepo {
 
 	_, err := collection.Indexes().CreateOne(context.Background(), indexModel)
 	if err != nil {
-		log.Fatalf("unable to create cart collection index, %v", err)
+		log.Fatalf("unable to address cart collection index, %v", err)
 	}
 
 	return &AddressesRepo{

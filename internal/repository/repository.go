@@ -97,6 +97,11 @@ type Addresses interface {
 	Delete(ctx context.Context, userID primitive.ObjectID, addressID primitive.ObjectID) error
 }
 
+type Stores interface {
+	FindByUserID(ctx context.Context, userID primitive.ObjectID) (domain.Store, error)
+	Create(ctx context.Context, store dto.StoreRegisterDTO) (domain.Store, error)
+}
+
 type Repositories struct {
 	Users      Users
 	Products   Products
@@ -107,6 +112,7 @@ type Repositories struct {
 	Categories Categories
 	Areas      Areas
 	Addresses  Addresses
+	Stores     Stores
 }
 
 func NewRepositories(db *mongo.Database) *Repositories {
@@ -120,5 +126,6 @@ func NewRepositories(db *mongo.Database) *Repositories {
 		Categories: NewCategoriesRepo(db),
 		Areas:      NewAreasRepo(db),
 		Addresses:  NewAddressesRepo(db),
+		Stores:     NewStoresRepo(db),
 	}
 }

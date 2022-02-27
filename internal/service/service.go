@@ -105,6 +105,11 @@ type Addresses interface {
 	Delete(ctx context.Context, userID primitive.ObjectID, addressID primitive.ObjectID) error
 }
 
+type Stores interface {
+	FindByUserID(ctx context.Context, userID primitive.ObjectID) (domain.Store, error)
+	Create(ctx context.Context, store dto.StoreRegisterDTO) (domain.Store, error)
+}
+
 type Services struct {
 	Users      Users
 	Products   Products
@@ -116,6 +121,7 @@ type Services struct {
 	Categories Categories
 	Areas      Areas
 	Addresses  Addresses
+	Stores     Stores
 }
 
 type Deps struct {
@@ -134,6 +140,7 @@ func NewServices(deps Deps) *Services {
 	ordersService := NewOrdersService(deps.Repos.Orders, productsService, cartsService)
 	areaService := NewAreasService(deps.Repos.Areas)
 	addressService := NewAddressesService(deps.Repos.Addresses, areaService)
+	storeService := NewStoresService(deps.Repos.Stores)
 	// paymentService := NewPaymentService(ordersService, productsService)
 
 	return &Services{
@@ -146,6 +153,7 @@ func NewServices(deps Deps) *Services {
 		Categories: CategoriesService,
 		Areas:      areaService,
 		Addresses:  addressService,
+		Stores:     storeService,
 		// Payment:  paymentService,
 	}
 }
