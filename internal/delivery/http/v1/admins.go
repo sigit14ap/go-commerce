@@ -87,23 +87,23 @@ func (h *Handler) adminSignIn(context *gin.Context) {
 	var signInDTO dto.SignInDTO
 	err := context.BindJSON(&signInDTO)
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, "invalid input body")
+		ErrorResponse(context, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
 	admin, err := h.services.Admins.FindByCredentials(context, signInDTO)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			errorResponse(context, http.StatusUnauthorized, "Email not found")
+			ErrorResponse(context, http.StatusUnauthorized, "Email not found")
 		} else {
-			errorResponse(context, http.StatusInternalServerError, err.Error())
+			ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		}
 		return
 	}
 
 	matchPassword := h.services.Users.CheckPasswordHash(signInDTO.Password, admin.Password)
 	if matchPassword == false {
-		errorResponse(context, http.StatusUnauthorized, "Password does not match")
+		ErrorResponse(context, http.StatusUnauthorized, "Password does not match")
 		return
 	}
 
@@ -113,7 +113,7 @@ func (h *Handler) adminSignIn(context *gin.Context) {
 		Claims:      adminClaims,
 	})
 	if err != nil {
-		errorResponse(context, http.StatusUnauthorized, err.Error())
+		ErrorResponse(context, http.StatusUnauthorized, err.Error())
 		return
 	}
 	successResponse(context, authDetails)
@@ -124,7 +124,7 @@ func (h *Handler) adminSignIn(context *gin.Context) {
 // @Tags     admin-auth
 // @Accept   json
 // @Produce  json
-// @Param    refreshInput  body      auth.RefreshInput  true  "refresh data"
+// @Param    refreshInput  body      auth.RefreshInput  true  "refresh services"
 // @Success  200           {object}  auth.AuthDetails
 // @Failure  400           {object}  failure
 // @Failure  401           {object}  failure

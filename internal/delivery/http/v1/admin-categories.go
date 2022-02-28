@@ -26,7 +26,7 @@ var validate *validator.Validate = validator.New()
 func (h *Handler) getAllCategoryAdmin(context *gin.Context) {
 	categories, err := h.services.Categories.FindAll(context.Request.Context())
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -55,13 +55,13 @@ func (h *Handler) getCategoryByIdAdmin(context *gin.Context) {
 
 	categoryID, err := getIdFromPath(context, "id")
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, err.Error())
+		ErrorResponse(context, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	category, err := h.services.Categories.FindByID(context.Request.Context(), categoryID)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -86,7 +86,7 @@ func (h *Handler) createCategoryAdmin(context *gin.Context) {
 	err := context.ShouldBindWith(&categoryInput, binding.FormMultipart)
 
 	if err != nil {
-		errorResponse(context, http.StatusUnprocessableEntity, "invalid input body")
+		ErrorResponse(context, http.StatusUnprocessableEntity, "invalid input body")
 		return
 	}
 
@@ -99,7 +99,7 @@ func (h *Handler) createCategoryAdmin(context *gin.Context) {
 	isContains := contains(allowedExt, filepath.Ext(icon.Filename))
 
 	if !isContains {
-		errorResponse(context, http.StatusUnprocessableEntity, "Icon must be jpg, jpeg or png")
+		ErrorResponse(context, http.StatusUnprocessableEntity, "Icon must be jpg, jpeg or png")
 		return
 	}
 
@@ -113,7 +113,7 @@ func (h *Handler) createCategoryAdmin(context *gin.Context) {
 
 	category, err := h.services.Categories.Create(context.Request.Context(), categoryDTO)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -140,13 +140,13 @@ func (h *Handler) updateCategoryAdmin(context *gin.Context) {
 	err := context.ShouldBind(&categoryInput)
 
 	if err != nil {
-		errorResponse(context, http.StatusUnprocessableEntity, "invalid input body")
+		ErrorResponse(context, http.StatusUnprocessableEntity, "invalid input body")
 		return
 	}
 
 	categoryID, err := getIdFromPath(context, "id")
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, err.Error())
+		ErrorResponse(context, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -161,7 +161,7 @@ func (h *Handler) updateCategoryAdmin(context *gin.Context) {
 		isContains := contains(allowedExt, filepath.Ext(icon.Filename))
 
 		if !isContains {
-			errorResponse(context, http.StatusUnprocessableEntity, "Icon must be jpg, jpeg or png")
+			ErrorResponse(context, http.StatusUnprocessableEntity, "Icon must be jpg, jpeg or png")
 			return
 		}
 
@@ -173,7 +173,7 @@ func (h *Handler) updateCategoryAdmin(context *gin.Context) {
 
 	category, err := h.services.Categories.Update(context.Request.Context(), categoryDTO, categoryID)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -197,13 +197,13 @@ func (h *Handler) deleteCategoryAdmin(context *gin.Context) {
 
 	categoryID, err := getIdFromPath(context, "id")
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, err.Error())
+		ErrorResponse(context, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	err = h.services.Categories.Delete(context.Request.Context(), categoryID)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 

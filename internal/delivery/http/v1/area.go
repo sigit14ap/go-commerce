@@ -26,7 +26,7 @@ func (h *Handler) initAreasRoutes(api *gin.RouterGroup) {
 func (h *Handler) getProvince(context *gin.Context) {
 	provinces, err := h.services.Areas.GetProvinces(context)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -48,13 +48,13 @@ func (h *Handler) getCity(context *gin.Context) {
 
 	err := context.BindJSON(&cityListInput)
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, "invalid input body")
+		ErrorResponse(context, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
 	provinceID, err := getIdFromRequest(cityListInput.ProvinceID)
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, err.Error())
+		ErrorResponse(context, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -64,7 +64,7 @@ func (h *Handler) getCity(context *gin.Context) {
 
 	cities, err := h.services.Areas.GetCities(context, cityListDTO)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 

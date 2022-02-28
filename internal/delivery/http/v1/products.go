@@ -42,7 +42,7 @@ func (h *Handler) initProductsRoutes(api *gin.RouterGroup) {
 func (h *Handler) getAllProducts(context *gin.Context) {
 	products, err := h.services.Products.FindAll(context.Request.Context())
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -69,16 +69,16 @@ func (h *Handler) getAllProducts(context *gin.Context) {
 func (h *Handler) getProductById(context *gin.Context) {
 	id, err := getIdFromPath(context, "id")
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, err.Error())
+		ErrorResponse(context, http.StatusBadRequest, err.Error())
 		return
 	}
 	product, err := h.services.Products.FindByID(context.Request.Context(), id)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			errorResponse(context, http.StatusInternalServerError,
+			ErrorResponse(context, http.StatusInternalServerError,
 				fmt.Sprintf("no products with id: %s", id.Hex()))
 		} else {
-			errorResponse(context, http.StatusInternalServerError, err.Error())
+			ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		}
 		return
 	}
@@ -101,13 +101,13 @@ func (h *Handler) getProductById(context *gin.Context) {
 func (h *Handler) getProductReviews(context *gin.Context) {
 	productID, err := getIdFromPath(context, "id")
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, err.Error())
+		ErrorResponse(context, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	reviews, err := h.services.Reviews.FindByProductID(context, productID)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -131,19 +131,19 @@ func (h *Handler) getProductReviews(context *gin.Context) {
 func (h *Handler) createProductReview(context *gin.Context) {
 	productID, err := getIdFromPath(context, "id")
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, err.Error())
+		ErrorResponse(context, http.StatusBadRequest, err.Error())
 		return
 	}
 	userID, err := getIdFromRequestContext(context, "userID")
 	if err != nil {
-		errorResponse(context, http.StatusUnauthorized, err.Error())
+		ErrorResponse(context, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	var createDTO dto.CreateReviewDTOUser
 	err = context.BindJSON(&createDTO)
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, "invalid input body")
+		ErrorResponse(context, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
@@ -155,7 +155,7 @@ func (h *Handler) createProductReview(context *gin.Context) {
 	})
 
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -211,19 +211,19 @@ func (h *Handler) createProductAdmin(context *gin.Context) {
 	var productDTO dto.CreateProductDTO
 	err := context.ShouldBindWith(&productDTO, binding.FormMultipart)
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, "invalid input body")
+		ErrorResponse(context, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
 	categoryID, err := primitive.ObjectIDFromHex(productDTO.CategoryID)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	_, err = h.services.Categories.FindByID(context.Request.Context(), categoryID)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -231,7 +231,7 @@ func (h *Handler) createProductAdmin(context *gin.Context) {
 	files := form.File["images[][image]"]
 
 	if len(files) == 0 {
-		errorResponse(context, http.StatusBadRequest, "images required")
+		ErrorResponse(context, http.StatusBadRequest, "images required")
 		return
 	}
 
@@ -243,7 +243,7 @@ func (h *Handler) createProductAdmin(context *gin.Context) {
 		isContains := contains(allowedExt, filepath.Ext(file.Filename))
 
 		if !isContains {
-			errorResponse(context, http.StatusBadRequest, "Icon must be jpg, jpeg or png")
+			ErrorResponse(context, http.StatusBadRequest, "Icon must be jpg, jpeg or png")
 			return
 		}
 
@@ -254,7 +254,7 @@ func (h *Handler) createProductAdmin(context *gin.Context) {
 	productDTO.Images = imagesArray
 	product, err := h.services.Products.Create(context.Request.Context(), productDTO)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -280,25 +280,25 @@ func (h *Handler) updateProductAdmin(context *gin.Context) {
 
 	err := context.ShouldBindWith(&productDTO, binding.FormMultipart)
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, "invalid input body")
+		ErrorResponse(context, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
 	productID, err := getIdFromPath(context, "id")
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, err.Error())
+		ErrorResponse(context, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	categoryID, err := primitive.ObjectIDFromHex(productDTO.CategoryID)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	_, err = h.services.Categories.FindByID(context.Request.Context(), categoryID)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -329,7 +329,7 @@ func (h *Handler) updateProductAdmin(context *gin.Context) {
 
 	product, err := h.services.Products.Update(context.Request.Context(), productDTO, productID)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -352,13 +352,13 @@ func (h *Handler) updateProductAdmin(context *gin.Context) {
 func (h *Handler) deleteProductAdmin(context *gin.Context) {
 	productID, err := getIdFromPath(context, "id")
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, err.Error())
+		ErrorResponse(context, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	err = h.services.Products.Delete(context, productID)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 

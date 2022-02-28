@@ -181,7 +181,7 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: refresh data
+      - description: refresh services
         in: body
         name: refreshInput
         required: true
@@ -1355,7 +1355,7 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: user refresh data
+      - description: user refresh services
         in: body
         name: refreshInput
         required: true
@@ -1429,7 +1429,7 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: user data
+      - description: user services
         in: body
         name: user
         required: true

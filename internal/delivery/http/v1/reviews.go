@@ -25,7 +25,7 @@ import (
 func (h *Handler) getAllReviewsAdmin(context *gin.Context) {
 	reviews, err := h.services.Reviews.FindAll(context.Request.Context())
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -53,16 +53,16 @@ func (h *Handler) getAllReviewsAdmin(context *gin.Context) {
 func (h *Handler) getReviewByIdAdmin(context *gin.Context) {
 	id, err := getIdFromPath(context, "id")
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, err.Error())
+		ErrorResponse(context, http.StatusBadRequest, err.Error())
 		return
 	}
 	review, err := h.services.Reviews.FindByID(context.Request.Context(), id)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			errorResponse(context, http.StatusInternalServerError,
+			ErrorResponse(context, http.StatusInternalServerError,
 				fmt.Sprintf("no reviews with id: %s", id.Hex()))
 		} else {
-			errorResponse(context, http.StatusInternalServerError, err.Error())
+			ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		}
 		return
 	}
@@ -87,7 +87,7 @@ func (h *Handler) createReviewAdmin(context *gin.Context) {
 	var reviewDTO dto.CreateReviewDTOAdmin
 	err := context.BindJSON(&reviewDTO)
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, "Invalid input body")
+		ErrorResponse(context, http.StatusBadRequest, "Invalid input body")
 		return
 	}
 	review, err := h.services.Reviews.Create(context.Request.Context(), dto.CreateReviewInput{
@@ -98,7 +98,7 @@ func (h *Handler) createReviewAdmin(context *gin.Context) {
 	})
 
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -121,13 +121,13 @@ func (h *Handler) createReviewAdmin(context *gin.Context) {
 func (h *Handler) deleteReviewAdmin(context *gin.Context) {
 	reviewID, err := getIdFromPath(context, "id")
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, err.Error())
+		ErrorResponse(context, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	err = h.services.Reviews.Delete(context, reviewID)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 

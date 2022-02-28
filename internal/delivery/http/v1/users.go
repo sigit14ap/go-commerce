@@ -8,10 +8,6 @@ import (
 func (h *Handler) initUsersRoutes(api *gin.RouterGroup) {
 	users := api.Group("/users")
 	{
-		users.POST("/auth/sign-in", h.userSignIn)
-		users.POST("/auth/sign-up", h.userSignUp)
-		users.POST("/auth/refresh", h.userRefresh)
-
 		authenticated := users.Group("/", h.verifyUser)
 		{
 			authenticated.GET("/account", h.getUserAccount)
@@ -34,13 +30,13 @@ func (h *Handler) initUsersRoutes(api *gin.RouterGroup) {
 func (h *Handler) getAllReviewsUser(context *gin.Context) {
 	userID, err := getIdFromRequestContext(context, "userID")
 	if err != nil {
-		errorResponse(context, http.StatusUnauthorized, err.Error())
+		ErrorResponse(context, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	reviews, err := h.services.Reviews.FindByUserID(context.Request.Context(), userID)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -61,13 +57,13 @@ func (h *Handler) getAllReviewsUser(context *gin.Context) {
 func (h *Handler) getUserAccount(context *gin.Context) {
 	userID, err := getIdFromRequestContext(context, "userID")
 	if err != nil {
-		errorResponse(context, http.StatusUnauthorized, err.Error())
+		ErrorResponse(context, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	userInfo, err := h.services.Users.FindUserInfo(context.Request.Context(), userID)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 

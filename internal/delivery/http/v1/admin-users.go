@@ -25,7 +25,7 @@ func (h *Handler) getAllUsersAdmin(context *gin.Context) {
 	users, err := h.services.Users.FindAll(context.Request.Context())
 
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -54,13 +54,13 @@ func (h *Handler) getUserByIdAdmin(context *gin.Context) {
 	id, err := getIdFromPath(context, "id")
 
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, err.Error())
+		ErrorResponse(context, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	user, err := h.services.Users.FindByID(context.Request.Context(), id)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -84,16 +84,16 @@ func (h *Handler) createUserAdmin(context *gin.Context) {
 	var userDTO dto.CreateUserDTO
 	err := context.BindJSON(&userDTO)
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, "invalid input body")
+		ErrorResponse(context, http.StatusBadRequest, "invalid input body")
 		return
 	}
 	user, err := h.services.Users.Create(context.Request.Context(), userDTO)
 	if err != nil {
 		if mongo.IsDuplicateKeyError(err) {
-			errorResponse(context, http.StatusInternalServerError,
+			ErrorResponse(context, http.StatusInternalServerError,
 				fmt.Sprintf("user with email %s already exists", userDTO.Email))
 		} else {
-			errorResponse(context, http.StatusInternalServerError, err.Error())
+			ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		}
 		return
 	}
@@ -120,19 +120,19 @@ func (h *Handler) updateUserAdmin(context *gin.Context) {
 
 	err := context.BindJSON(&userDTO)
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, "invalid input body")
+		ErrorResponse(context, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
 	userID, err := getIdFromPath(context, "id")
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, err.Error())
+		ErrorResponse(context, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	user, err := h.services.Users.Update(context.Request.Context(), userDTO, userID)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -155,13 +155,13 @@ func (h *Handler) updateUserAdmin(context *gin.Context) {
 func (h *Handler) deleteUserAdmin(context *gin.Context) {
 	userID, err := getIdFromPath(context, "id")
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, err.Error())
+		ErrorResponse(context, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	err = h.services.Users.Delete(context, userID)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 

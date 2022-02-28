@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/sigit14ap/go-commerce/internal/database/seeds"
+	"github.com/sigit14ap/go-commerce/internal/delivery/http/middleware"
 	"github.com/sigit14ap/go-commerce/internal/domain"
 	"github.com/sigit14ap/go-commerce/pkg/courier"
 	"github.com/sigit14ap/go-commerce/pkg/storage"
@@ -56,7 +57,9 @@ func Run(configPath string, command domain.Command) {
 
 	courierProvider := courier.NewCourierProvider()
 
-	handlers := delivery.NewHandler(services, tokenProvider, storageProvider, courierProvider)
+	middlewares := middleware.NewMiddleware(services)
+
+	handlers := delivery.NewHandler(services, tokenProvider, storageProvider, courierProvider, middlewares)
 	log.Info("Services, repositories and handlers initialized")
 
 	seeder := seeds.NewDatabase(services, courierProvider)

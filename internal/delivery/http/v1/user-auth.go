@@ -15,6 +15,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+func (h *Handler) initUserAuthRoutes(api *gin.RouterGroup) {
+	auth := api.Group("/auth")
+	{
+		auth.POST("/sign-in", h.userSignIn)
+		auth.POST("/sign-up", h.userSignUp)
+		auth.POST("/refresh", h.userRefresh)
+	}
+}
+
 // UserSignIn godoc
 // @Summary  User sign-in
 // @Tags     user-auth
@@ -32,7 +41,7 @@ func (h *Handler) userSignIn(context *gin.Context) {
 
 	err := context.BindJSON(&signInDTO)
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, "invalid input body")
+		ErrorResponse(context, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
@@ -41,16 +50,16 @@ func (h *Handler) userSignIn(context *gin.Context) {
 	log.Error(h.services.Users.CheckPasswordHash(signInDTO.Password, user.Password))
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			errorResponse(context, http.StatusUnauthorized, "Email not found")
+			ErrorResponse(context, http.StatusUnauthorized, "Email not found")
 		} else {
-			errorResponse(context, http.StatusInternalServerError, err.Error())
+			ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		}
 		return
 	}
 
 	matchPassword := h.services.Users.CheckPasswordHash(signInDTO.Password, user.Password)
 	if matchPassword == false {
-		errorResponse(context, http.StatusUnauthorized, "Password does not match")
+		ErrorResponse(context, http.StatusUnauthorized, "Password does not match")
 		return
 	}
 
@@ -61,7 +70,7 @@ func (h *Handler) userSignIn(context *gin.Context) {
 	})
 
 	if err != nil {
-		errorResponse(context, http.StatusUnauthorized, err.Error())
+		ErrorResponse(context, http.StatusUnauthorized, err.Error())
 		return
 	}
 	successResponse(context, authDetails)
@@ -72,7 +81,7 @@ func (h *Handler) userSignIn(context *gin.Context) {
 // @Tags     user-auth
 // @Accept   json
 // @Produce  json
-// @Param    user  body      dto.SignUpDTO  true  "user data"
+// @Param    user  body      dto.SignUpDTO  true  "user services"
 // @Success  200   {object}  domain.UserInfo
 // @Failure  400   {object}  failure
 // @Failure  401   {object}  failure
@@ -86,7 +95,7 @@ func (h *Handler) userSignUp(context *gin.Context) {
 	if err != nil {
 
 		for _, fieldErr := range err.(validator.ValidationErrors) {
-			errorResponse(context, http.StatusUnprocessableEntity, fmt.Sprintf(fieldErr.Error()))
+			ErrorResponse(context, http.StatusUnprocessableEntity, fmt.Sprintf(fieldErr.Error()))
 			return // exit on first error
 		}
 	}
@@ -99,10 +108,10 @@ func (h *Handler) userSignUp(context *gin.Context) {
 
 	if err != nil {
 		if mongo.IsDuplicateKeyError(err) {
-			errorResponse(context, http.StatusInternalServerError,
+			ErrorResponse(context, http.StatusInternalServerError,
 				fmt.Sprintf("user with email %s already exists", signUpDTO.Email))
 		} else {
-			errorResponse(context, http.StatusInternalServerError, err.Error())
+			ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		}
 		return
 	}
@@ -119,7 +128,7 @@ func (h *Handler) userSignUp(context *gin.Context) {
 // @Tags     user-auth
 // @Accept   json
 // @Produce  json
-// @Param    refreshInput  body      auth.RefreshInput  true  "user refresh data"
+// @Param    refreshInput  body      auth.RefreshInput  true  "user refresh services"
 // @Success  200           {object}  auth.AuthDetails
 // @Failure  400           {object}  failure
 // @Failure  401           {object}  failure

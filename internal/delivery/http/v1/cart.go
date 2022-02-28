@@ -35,13 +35,13 @@ func (h *Handler) initCartRoutes(api *gin.RouterGroup) {
 func (h *Handler) getCartItems(context *gin.Context) {
 	userID, err := getIdFromRequestContext(context, "userID")
 	if err != nil {
-		errorResponse(context, http.StatusUnauthorized, err.Error())
+		ErrorResponse(context, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	cartItems, err := h.services.Carts.FindCartItems(context, userID)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -64,20 +64,20 @@ func (h *Handler) getCartItems(context *gin.Context) {
 func (h *Handler) createCartItem(context *gin.Context) {
 	userID, err := getIdFromRequestContext(context, "userID")
 	if err != nil {
-		errorResponse(context, http.StatusUnauthorized, err.Error())
+		ErrorResponse(context, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	var cartItemInput dto.AddToCartDTO
 	err = context.BindJSON(&cartItemInput)
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, "invalid input body")
+		ErrorResponse(context, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
 	productID, err := getIdFromRequest(cartItemInput.ProductID)
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, err.Error())
+		ErrorResponse(context, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -88,7 +88,7 @@ func (h *Handler) createCartItem(context *gin.Context) {
 
 	cartItem, err := h.services.Carts.AddCartItem(context, cartData, userID)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -112,20 +112,20 @@ func (h *Handler) createCartItem(context *gin.Context) {
 func (h *Handler) updateCartItem(context *gin.Context) {
 	userID, err := getIdFromRequestContext(context, "userID")
 	if err != nil {
-		errorResponse(context, http.StatusUnauthorized, err.Error())
+		ErrorResponse(context, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	productID, err := getIdFromPath(context, "productID")
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, err.Error())
+		ErrorResponse(context, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	var cartItemInput dto.UpdateCartItemDTO
 	err = context.BindJSON(&cartItemInput)
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, "invalid input body")
+		ErrorResponse(context, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
@@ -134,7 +134,7 @@ func (h *Handler) updateCartItem(context *gin.Context) {
 		Quantity:  cartItemInput.Quantity,
 	}, userID)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -156,19 +156,19 @@ func (h *Handler) updateCartItem(context *gin.Context) {
 func (h *Handler) deleteCartItem(context *gin.Context) {
 	userID, err := getIdFromRequestContext(context, "userID")
 	if err != nil {
-		errorResponse(context, http.StatusUnauthorized, err.Error())
+		ErrorResponse(context, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	productID, err := getIdFromPath(context, "productID")
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, err.Error())
+		ErrorResponse(context, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	err = h.services.Carts.DeleteCartItem(context, productID, userID)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -190,13 +190,13 @@ func (h *Handler) deleteCartItem(context *gin.Context) {
 func (h *Handler) clearCart(context *gin.Context) {
 	userID, err := getIdFromRequestContext(context, "userID")
 	if err != nil {
-		errorResponse(context, http.StatusUnauthorized, err.Error())
+		ErrorResponse(context, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	err = h.services.Carts.ClearCart(context, userID)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -218,7 +218,7 @@ func (h *Handler) clearCart(context *gin.Context) {
 func (h *Handler) getAllCartsAdmin(context *gin.Context) {
 	carts, err := h.services.Carts.FindAll(context.Request.Context())
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -246,16 +246,16 @@ func (h *Handler) getAllCartsAdmin(context *gin.Context) {
 func (h *Handler) getCartByIdAdmin(context *gin.Context) {
 	id, err := getIdFromPath(context, "id")
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, err.Error())
+		ErrorResponse(context, http.StatusBadRequest, err.Error())
 		return
 	}
 	cart, err := h.services.Carts.FindByID(context.Request.Context(), id)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			errorResponse(context, http.StatusInternalServerError,
+			ErrorResponse(context, http.StatusInternalServerError,
 				fmt.Sprintf("no carts with id: %s", id.Hex()))
 		} else {
-			errorResponse(context, http.StatusInternalServerError, err.Error())
+			ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		}
 		return
 	}
@@ -279,13 +279,13 @@ func (h *Handler) getCartByIdAdmin(context *gin.Context) {
 func (h *Handler) deleteCartAdmin(context *gin.Context) {
 	cartID, err := getIdFromPath(context, "id")
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, err.Error())
+		ErrorResponse(context, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	err = h.services.Carts.Delete(context, cartID)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 

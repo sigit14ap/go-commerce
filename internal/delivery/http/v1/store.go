@@ -8,11 +8,7 @@ import (
 )
 
 func (h *Handler) initStoreRoutes(api *gin.RouterGroup) {
-	store := api.Group("/store", h.verifyUser)
-	{
-		store.POST("/register", h.storeRegister)
-
-	}
+	api.POST("/register", h.storeRegister)
 }
 
 // StoreRegister godoc
@@ -30,7 +26,7 @@ func (h *Handler) initStoreRoutes(api *gin.RouterGroup) {
 func (h *Handler) storeRegister(context *gin.Context) {
 	userID, err := getIdFromRequestContext(context, "userID")
 	if err != nil {
-		errorResponse(context, http.StatusUnauthorized, err.Error())
+		ErrorResponse(context, http.StatusUnauthorized, err.Error())
 		return
 	}
 
@@ -50,14 +46,21 @@ func (h *Handler) storeRegister(context *gin.Context) {
 	_, err = h.services.Stores.FindByUserID(context, userID)
 
 	if err == nil {
-		errorResponse(context, http.StatusForbidden, "Already registered as store")
+		ErrorResponse(context, http.StatusForbidden, "Already registered as store")
+		return
+	}
+
+	_, err = h.services.Stores.FindByDomain(context, registerDTO.Domain)
+
+	if err == nil {
+		ErrorResponse(context, http.StatusBadRequest, "Domain already used")
 		return
 	}
 
 	data, err := h.services.Stores.Create(context, registerDTO)
 
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 

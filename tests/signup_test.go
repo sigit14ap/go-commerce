@@ -9,7 +9,7 @@ import (
 )
 
 type Response struct {
-	Data interface{} `json:"data"`
+	Data interface{} `json:"services"`
 }
 
 var h = v1.Handler{}
@@ -46,8 +46,8 @@ func TestSignUp(t *testing.T) {
 	//test.Send(payload)
 	//test.Set("Content-Type", "application/json")
 	//test.End(func(req *http.Request, rr *httptest.ResponseRecorder) {
-	//	//var response Response
-	//	//json.Unmarshal(rr.Body.Bytes(), &response)
+	//	//var services Response
+	//	//json.Unmarshal(rr.Body.Bytes(), &services)
 	//
 	//	assert.Equal(t, http.StatusCreated, rr.Code)
 	//})

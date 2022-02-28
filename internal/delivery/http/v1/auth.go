@@ -34,7 +34,7 @@ func (h *Handler) refreshToken(context *gin.Context) {
 	var input auth.RefreshInput
 	err := context.BindJSON(&input)
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, "Invalid request body")
+		ErrorResponse(context, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
@@ -44,7 +44,7 @@ func (h *Handler) refreshToken(context *gin.Context) {
 	})
 
 	if err != nil {
-		errorResponse(context, http.StatusUnauthorized, err.Error())
+		ErrorResponse(context, http.StatusUnauthorized, err.Error())
 		return
 	}
 
@@ -54,19 +54,19 @@ func (h *Handler) refreshToken(context *gin.Context) {
 func (h *Handler) verifyToken(context *gin.Context, idName string) {
 	tokenString, err := extractAuthToken(context)
 	if err != nil {
-		errorResponse(context, http.StatusUnauthorized, err.Error())
+		ErrorResponse(context, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	tokenClaims, err := h.tokenProvider.VerifyToken(tokenString)
 	if err != nil {
-		errorResponse(context, http.StatusUnauthorized, err.Error())
+		ErrorResponse(context, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	id, ok := tokenClaims[idName]
 	if !ok {
-		errorResponse(context, http.StatusForbidden, "this endpoint is forbidden")
+		ErrorResponse(context, http.StatusForbidden, "this endpoint is forbidden")
 		return
 	}
 

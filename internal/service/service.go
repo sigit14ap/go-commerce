@@ -107,6 +107,7 @@ type Addresses interface {
 
 type Stores interface {
 	FindByUserID(ctx context.Context, userID primitive.ObjectID) (domain.Store, error)
+	FindByDomain(ctx context.Context, domainStore string) (domain.Store, error)
 	Create(ctx context.Context, store dto.StoreRegisterDTO) (domain.Store, error)
 }
 

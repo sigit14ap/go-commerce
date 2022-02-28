@@ -32,7 +32,7 @@ func (h *Handler) initOrdersRoutes(api *gin.RouterGroup) {
 func (h *Handler) getDeliveryCost(context *gin.Context) {
 	userID, err := getIdFromRequestContext(context, "userID")
 	if err != nil {
-		errorResponse(context, http.StatusUnauthorized, err.Error())
+		ErrorResponse(context, http.StatusUnauthorized, err.Error())
 		return
 	}
 
@@ -49,14 +49,14 @@ func (h *Handler) getDeliveryCost(context *gin.Context) {
 		productID, err := getIdFromRequest(product.ProductID)
 
 		if err != nil {
-			errorResponse(context, http.StatusBadRequest, err.Error())
+			ErrorResponse(context, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		_, err = h.services.Carts.FindItem(context, userID, productID)
 
 		if err != nil {
-			errorResponse(context, http.StatusBadRequest, "Product id "+product.ProductID+" not found in cart")
+			ErrorResponse(context, http.StatusBadRequest, "Product id "+product.ProductID+" not found in cart")
 			return
 		}
 	}
@@ -78,13 +78,13 @@ func (h *Handler) getDeliveryCost(context *gin.Context) {
 func (h *Handler) getUserOrders(context *gin.Context) {
 	userID, err := getIdFromRequestContext(context, "userID")
 	if err != nil {
-		errorResponse(context, http.StatusUnauthorized, err.Error())
+		ErrorResponse(context, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	orders, err := h.services.Orders.FindByUserID(context.Request.Context(), userID)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -107,18 +107,18 @@ func (h *Handler) getUserOrders(context *gin.Context) {
 func (h *Handler) createOrder(context *gin.Context) {
 	userID, err := getIdFromRequestContext(context, "userID")
 	if err != nil {
-		errorResponse(context, http.StatusUnauthorized, err.Error())
+		ErrorResponse(context, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	cart, err := h.services.Carts.FindByID(context.Request.Context(), userID)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	if len(cart.CartItems) == 0 {
-		errorResponse(context, http.StatusBadRequest, "user cart is empty")
+		ErrorResponse(context, http.StatusBadRequest, "user cart is empty")
 		return
 	}
 
@@ -133,7 +133,7 @@ func (h *Handler) createOrder(context *gin.Context) {
 	var createOrderDTO dto.CreateOrderDTO
 	err = context.BindJSON(&createOrderDTO)
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, "invalid input body")
+		ErrorResponse(context, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
@@ -144,13 +144,13 @@ func (h *Handler) createOrder(context *gin.Context) {
 	})
 
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	err = h.services.Carts.ClearCart(context.Request.Context(), cart.ID)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, "cart can't be cleared")
+		ErrorResponse(context, http.StatusInternalServerError, "cart can't be cleared")
 		return
 	}
 
@@ -173,13 +173,13 @@ func (h *Handler) createOrder(context *gin.Context) {
 func (h *Handler) getOrderPaymentLink(context *gin.Context) {
 	orderID, err := getIdFromPath(context, "id")
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, err.Error())
+		ErrorResponse(context, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	link, err := h.services.Payment.GetPaymentLink(context.Request.Context(), orderID)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -200,7 +200,7 @@ func (h *Handler) getOrderPaymentLink(context *gin.Context) {
 func (h *Handler) getAllOrdersAdmin(context *gin.Context) {
 	orders, err := h.services.Orders.FindAll(context.Request.Context())
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -231,19 +231,19 @@ func (h *Handler) updateOrderAdmin(context *gin.Context) {
 
 	err := context.BindJSON(&orderDTO)
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, "invalid input body")
+		ErrorResponse(context, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
 	orderID, err := getIdFromPath(context, "id")
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, err.Error())
+		ErrorResponse(context, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	order, err := h.services.Orders.Update(context.Request.Context(), orderDTO, orderID)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 

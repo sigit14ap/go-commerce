@@ -2,6 +2,7 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/sigit14ap/go-commerce/internal/delivery/http/middleware"
 	v1 "github.com/sigit14ap/go-commerce/internal/delivery/http/v1"
 	"github.com/sigit14ap/go-commerce/internal/service"
 	"github.com/sigit14ap/go-commerce/pkg/auth"
@@ -20,14 +21,16 @@ type Handler struct {
 	tokenProvider   auth.TokenProvider
 	storageProvider storage.StorageProvider
 	courierProvider courier.CourierProvider
+	middlewares     *middleware.MiddlewareService
 }
 
-func NewHandler(services *service.Services, tokenProvider auth.TokenProvider, storageProvider storage.StorageProvider, courierProvider courier.CourierProvider) *Handler {
+func NewHandler(services *service.Services, tokenProvider auth.TokenProvider, storageProvider storage.StorageProvider, courierProvider courier.CourierProvider, middlewares *middleware.MiddlewareService) *Handler {
 	return &Handler{
 		services:        services,
 		tokenProvider:   tokenProvider,
 		storageProvider: storageProvider,
 		courierProvider: courierProvider,
+		middlewares:     middlewares,
 	}
 }
 
@@ -46,7 +49,7 @@ func (h *Handler) Init() *gin.Engine {
 }
 
 func (h *Handler) initAPI(router *gin.Engine) {
-	handlerV1 := v1.NewHandler(h.services, h.tokenProvider, h.storageProvider, h.courierProvider)
+	handlerV1 := v1.NewHandler(h.services, h.tokenProvider, h.storageProvider, h.courierProvider, h.middlewares)
 	api := router.Group("/api")
 	{
 		handlerV1.Init(api)

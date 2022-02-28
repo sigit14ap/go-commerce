@@ -25,6 +25,15 @@ func (repo *StoresRepo) FindByUserID(ctx context.Context, userID primitive.Objec
 	return store, err
 }
 
+func (repo *StoresRepo) FindByDomain(ctx context.Context, domainStore string) (domain.Store, error) {
+	result := repo.db.FindOne(ctx, bson.M{"domain": domainStore})
+
+	var store domain.Store
+	err := result.Decode(&store)
+
+	return store, err
+}
+
 func (repo *StoresRepo) Create(ctx context.Context, store dto.StoreRegisterDTO) (domain.Store, error) {
 	result, err := repo.db.InsertOne(ctx, store)
 

@@ -30,13 +30,13 @@ func (h *Handler) initUserAddressRoutes(api *gin.RouterGroup) {
 func (h *Handler) getAddress(context *gin.Context) {
 	userID, err := getIdFromRequestContext(context, "userID")
 	if err != nil {
-		errorResponse(context, http.StatusUnauthorized, err.Error())
+		ErrorResponse(context, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	data, err := h.services.Addresses.FindAll(context, userID)
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -58,7 +58,7 @@ func (h *Handler) getAddress(context *gin.Context) {
 func (h *Handler) createAddress(context *gin.Context) {
 	userID, err := getIdFromRequestContext(context, "userID")
 	if err != nil {
-		errorResponse(context, http.StatusUnauthorized, err.Error())
+		ErrorResponse(context, http.StatusUnauthorized, err.Error())
 		return
 	}
 
@@ -74,14 +74,14 @@ func (h *Handler) createAddress(context *gin.Context) {
 	provinceID, err := getIdFromRequest(input.ProvinceID)
 
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, err.Error())
+		ErrorResponse(context, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	cityID, err := getIdFromRequest(input.CityID)
 
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, err.Error())
+		ErrorResponse(context, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -94,14 +94,14 @@ func (h *Handler) createAddress(context *gin.Context) {
 	_, err = h.services.Areas.FindCityAndProvince(context, cityID, provinceID)
 
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, "City not found")
+		ErrorResponse(context, http.StatusBadRequest, "City not found")
 		return
 	}
 
 	data, err := h.services.Addresses.Create(context, addressDTO)
 
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -124,20 +124,20 @@ func (h *Handler) createAddress(context *gin.Context) {
 func (h *Handler) updateAddress(context *gin.Context) {
 	userID, err := getIdFromRequestContext(context, "userID")
 	if err != nil {
-		errorResponse(context, http.StatusUnauthorized, err.Error())
+		ErrorResponse(context, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	addressID, err := getIdFromPath(context, "addressID")
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, err.Error())
+		ErrorResponse(context, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	_, err = h.services.Addresses.Find(context, userID, addressID)
 
 	if err != nil {
-		errorResponse(context, http.StatusNotFound, "Address not found")
+		ErrorResponse(context, http.StatusNotFound, "Address not found")
 		return
 	}
 
@@ -153,14 +153,14 @@ func (h *Handler) updateAddress(context *gin.Context) {
 	provinceID, err := getIdFromRequest(input.ProvinceID)
 
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, err.Error())
+		ErrorResponse(context, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	cityID, err := getIdFromRequest(input.CityID)
 
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, err.Error())
+		ErrorResponse(context, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -173,14 +173,14 @@ func (h *Handler) updateAddress(context *gin.Context) {
 	_, err = h.services.Areas.FindCityAndProvince(context, cityID, provinceID)
 
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, "City not found")
+		ErrorResponse(context, http.StatusBadRequest, "City not found")
 		return
 	}
 
 	data, err := h.services.Addresses.Update(context, userID, addressID, addressDTO)
 
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -202,27 +202,27 @@ func (h *Handler) updateAddress(context *gin.Context) {
 func (h *Handler) deleteAddress(context *gin.Context) {
 	userID, err := getIdFromRequestContext(context, "userID")
 	if err != nil {
-		errorResponse(context, http.StatusUnauthorized, err.Error())
+		ErrorResponse(context, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	addressID, err := getIdFromPath(context, "addressID")
 	if err != nil {
-		errorResponse(context, http.StatusBadRequest, err.Error())
+		ErrorResponse(context, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	_, err = h.services.Addresses.Find(context, userID, addressID)
 
 	if err != nil {
-		errorResponse(context, http.StatusNotFound, "Address not found")
+		ErrorResponse(context, http.StatusNotFound, "Address not found")
 		return
 	}
 
 	err = h.services.Addresses.Delete(context, userID, addressID)
 
 	if err != nil {
-		errorResponse(context, http.StatusInternalServerError, err.Error())
+		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 

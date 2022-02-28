@@ -22,6 +22,10 @@ func (service *StoresService) FindByUserID(ctx context.Context, userID primitive
 	return service.repo.FindByUserID(ctx, userID)
 }
 
+func (service *StoresService) FindByDomain(ctx context.Context, domainStore string) (domain.Store, error) {
+	return service.repo.FindByDomain(ctx, domainStore)
+}
+
 func (service *StoresService) Create(ctx context.Context, store dto.StoreRegisterDTO) (domain.Store, error) {
 	return service.repo.Create(ctx, store)
 }
