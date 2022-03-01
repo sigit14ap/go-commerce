@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"github.com/sigit14ap/go-commerce/internal/domain"
-	"github.com/sigit14ap/go-commerce/internal/domain/dto"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -50,36 +49,28 @@ func (p ProductsRepo) Create(ctx context.Context, product domain.Product) (domai
 	return product, err
 }
 
-func (p ProductsRepo) Update(ctx context.Context, productInput dto.UpdateProductInput, productID primitive.ObjectID) (domain.Product, error) {
+func (p ProductsRepo) Update(ctx context.Context, product domain.Product, productID primitive.ObjectID) (domain.Product, error) {
 	updateQuery := bson.M{}
 
-	if productInput.Name != "" {
-		updateQuery["name"] = productInput.Name
+	if product.Name != "" {
+		updateQuery["name"] = product.Name
 	}
 
-	if productInput.Description != nil {
-		updateQuery["description"] = productInput.Description
-	}
-
-	if productInput.Price != nil {
-		updateQuery["price"] = productInput.Price
-	}
-
-	if productInput.CategoryID != "" {
-		updateQuery["category_id"] = productInput.CategoryID
+	if product.Description != "" {
+		updateQuery["description"] = product.Description
 	}
 
 	_, err := p.db.UpdateOne(ctx, bson.M{"_id": productID}, bson.M{"$set": updateQuery})
 	findResult := p.db.FindOne(ctx, bson.M{"_id": productID})
 
-	var product domain.Product
-	err = findResult.Decode(&product)
+	var result domain.Product
+	err = findResult.Decode(&result)
 
-	return product, err
+	return result, err
 }
 
-func (p ProductsRepo) Delete(ctx context.Context, productID primitive.ObjectID) error {
-	_, err := p.db.DeleteOne(ctx, bson.M{"_id": productID})
+func (p ProductsRepo) Delete(ctx context.Context, productID primitive.ObjectID, storeID primitive.ObjectID) error {
+	_, err := p.db.DeleteOne(ctx, bson.M{"_id": productID, "storeID": storeID})
 	return err
 }
 

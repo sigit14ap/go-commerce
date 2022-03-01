@@ -24,9 +24,9 @@ type Products interface {
 	FindAll(ctx context.Context) ([]domain.Product, error)
 	FindByID(ctx context.Context, productID primitive.ObjectID) (domain.Product, error)
 	Create(ctx context.Context, product domain.Product) (domain.Product, error)
-	Update(ctx context.Context, productInput dto.UpdateProductInput,
+	Update(ctx context.Context, product domain.Product,
 		productID primitive.ObjectID) (domain.Product, error)
-	Delete(ctx context.Context, productID primitive.ObjectID) error
+	Delete(ctx context.Context, productID primitive.ObjectID, storeID primitive.ObjectID) error
 }
 
 type Reviews interface {

@@ -4,11 +4,12 @@ import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type Product struct {
 	ID          primitive.ObjectID `json:"id" bson:"_id,omitempty"`
+	StoreID     primitive.ObjectID `json:"store_id" bson:"store_id"`
 	Name        string             `json:"name" bson:"name"`
 	Description string             `json:"description" bson:"description"`
 	Price       float64            `json:"price" bson:"price"`
 	TotalRating float64            `json:"total_rating" bson:"-"`
-	CategoryID  string             `json:"-" bson:"category_id"`
+	CategoryID  primitive.ObjectID `json:"-" bson:"category_id"`
 	Category    Category           `json:"category" bson:"-"`
 	Images      []ProductImage     `json:"images" bson:"images"`
 	Weight      int64              `json:"weight" bson:"weight"`

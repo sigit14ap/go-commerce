@@ -28,7 +28,7 @@ type Products interface {
 	Create(ctx context.Context, productDTO dto.CreateProductDTO) (domain.Product, error)
 	Update(ctx context.Context, productDTO dto.UpdateProductDTO,
 		productID primitive.ObjectID) (domain.Product, error)
-	Delete(ctx context.Context, productID primitive.ObjectID) error
+	Delete(ctx context.Context, productID primitive.ObjectID, storeID primitive.ObjectID) error
 }
 
 type Reviews interface {

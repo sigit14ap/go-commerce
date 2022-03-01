@@ -32,9 +32,6 @@ func (h *Handler) initAdminsRoutes(api *gin.RouterGroup) {
 			{
 				products.GET("/", h.getAllProductsAdmin)
 				products.GET("/:id", h.getProductByIdAdmin)
-				products.POST("/", h.createProductAdmin)
-				products.PUT("/:id", h.updateProductAdmin)
-				products.DELETE("/:id", h.deleteProductAdmin)
 				products.GET("/:id/reviews", h.getProductReviewsAdmin)
 			}
 

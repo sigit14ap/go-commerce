@@ -26,12 +26,7 @@ func (p *ProductsService) FindAll(ctx context.Context) ([]domain.Product, error)
 			return nil, err
 		}
 
-		categoryID, err := primitive.ObjectIDFromHex(product.CategoryID)
-		if err != nil {
-			return nil, err
-		}
-
-		products[i].Category, err = p.categoriesService.FindByID(ctx, categoryID)
+		products[i].Category, err = p.categoriesService.FindByID(ctx, product.CategoryID)
 		if err != nil {
 			return nil, err
 		}
@@ -48,12 +43,7 @@ func (p *ProductsService) FindByID(ctx context.Context, productID primitive.Obje
 
 	product.TotalRating, err = p.reviewsService.GetTotalReviewRating(ctx, productID)
 
-	categoryID, err := primitive.ObjectIDFromHex(product.CategoryID)
-	if err != nil {
-		return domain.Product{}, err
-	}
-
-	product.Category, err = p.categoriesService.FindByID(ctx, categoryID)
+	product.Category, err = p.categoriesService.FindByID(ctx, product.CategoryID)
 	if err != nil {
 		return domain.Product{}, err
 	}
@@ -71,7 +61,8 @@ func (p *ProductsService) Create(ctx context.Context, product dto.CreateProductD
 		})
 	}
 
-	return p.repo.Create(ctx, domain.Product{
+	result, err := p.repo.Create(ctx, domain.Product{
+		StoreID:     product.StoreID,
 		Name:        product.Name,
 		Description: product.Description,
 		Price:       product.Price,
@@ -79,19 +70,38 @@ func (p *ProductsService) Create(ctx context.Context, product dto.CreateProductD
 		Images:      images,
 		Weight:      product.Weight,
 	})
+
+	result.Category, err = p.categoriesService.FindByID(ctx, product.CategoryID)
+	if err != nil {
+		return domain.Product{}, err
+	}
+
+	return result, err
 }
 
 func (p *ProductsService) Update(ctx context.Context, productDTO dto.UpdateProductDTO, productID primitive.ObjectID) (domain.Product, error) {
-	return p.repo.Update(ctx, dto.UpdateProductInput{
+
+	var images []domain.ProductImage
+
+	for _, image := range productDTO.Images {
+		images = append(images, domain.ProductImage{
+			Image: image,
+		})
+	}
+
+	return p.repo.Update(ctx, domain.Product{
+		StoreID:     productDTO.StoreID,
 		Name:        productDTO.Name,
 		Description: productDTO.Description,
 		Price:       productDTO.Price,
 		CategoryID:  productDTO.CategoryID,
+		Images:      images,
+		Weight:      productDTO.Weight,
 	}, productID)
 }
 
-func (p *ProductsService) Delete(ctx context.Context, productID primitive.ObjectID) error {
-	err := p.repo.Delete(ctx, productID)
+func (p *ProductsService) Delete(ctx context.Context, productID primitive.ObjectID, storeID primitive.ObjectID) error {
+	err := p.repo.Delete(ctx, productID, storeID)
 	if err != nil {
 		return err
 	}
