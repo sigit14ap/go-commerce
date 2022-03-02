@@ -12,3 +12,13 @@ type StoreRegisterDTO struct {
 	Name   string             `json:"name" bson:"name"`
 	Domain string             `json:"domain" bson:"domain"`
 }
+
+type StoreShipmentInput struct {
+	ProvinceID string `json:"province_id" validate:"required"`
+	CityID     string `json:"city_id" validate:"required"`
+}
+
+type StoreShipmentDTO struct {
+	ProvinceID primitive.ObjectID `json:"province_id" bson:"province_id"`
+	CityID     primitive.ObjectID `json:"city_id" bson:"city_id"`
+}

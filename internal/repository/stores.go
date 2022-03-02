@@ -44,6 +44,22 @@ func (repo *StoresRepo) Create(ctx context.Context, store dto.StoreRegisterDTO) 
 	return data, err
 }
 
+func (repo *StoresRepo) UpdateShipment(ctx context.Context, storeID primitive.ObjectID, shipment dto.StoreShipmentDTO) (domain.Store, error) {
+	data := domain.Store{}
+	_, err := repo.db.UpdateOne(ctx, bson.M{"_id": storeID}, bson.M{"$set": bson.M{"shipment_city_id": shipment.CityID, "shipment_province_id": shipment.ProvinceID}})
+
+	if err != nil {
+		return data, err
+	}
+
+	result := repo.db.FindOne(ctx, bson.M{"_id": storeID})
+
+	var store domain.Store
+	err = result.Decode(&store)
+
+	return store, err
+}
+
 func NewStoresRepo(db *mongo.Database) *StoresRepo {
 	collection := db.Collection(storesCollection)
 	indexModel := mongo.IndexModel{

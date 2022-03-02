@@ -16,7 +16,6 @@ import (
 	"path/filepath"
 )
 
-//TODO: add product search by query
 func (h *Handler) initStoreProductRoutes(api *gin.RouterGroup) {
 	products := api.Group("/products")
 	{
@@ -41,7 +40,10 @@ func (h *Handler) initStoreProductRoutes(api *gin.RouterGroup) {
 // @Security  StoreAuth
 // @Router   /store/products [get]
 func (h *Handler) storeGetProduct(context *gin.Context) {
-	products, err := h.services.Products.FindAll(context.Request.Context())
+
+	storeID, _ := services.GetIdFromRequestContext(context, "storeID")
+
+	products, err := h.services.Products.GetBySellerID(context.Request.Context(), storeID)
 	if err != nil {
 		ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
@@ -103,24 +105,36 @@ func (h *Handler) storeDetailProduct(context *gin.Context) {
 // @Router    /store/products [post]
 func (h *Handler) storeCreateProduct(context *gin.Context) {
 
-	storeID, _ := services.GetIdFromRequestContext(context, "storeID")
+	storeData, err := services.GetDataFromContext(context, "storeData")
+
+	if err != nil {
+		services.ErrorResponse(context, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	store := storeData.(domain.Store)
+
+	if store.ShipmentCityID == primitive.NilObjectID {
+		services.ErrorResponse(context, http.StatusBadRequest, "Shipment origin is not setting yet")
+		return
+	}
 
 	var productInput dto.CreateProductInput
-	err := context.ShouldBindWith(&productInput, binding.FormMultipart)
+	err = context.ShouldBindWith(&productInput, binding.FormMultipart)
 	if err != nil {
-		ErrorResponse(context, http.StatusBadRequest, "invalid input body")
+		services.ErrorResponse(context, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
 	categoryID, err := primitive.ObjectIDFromHex(productInput.CategoryID)
 	if err != nil {
-		ErrorResponse(context, http.StatusInternalServerError, err.Error())
+		services.ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	category, err := h.services.Categories.FindByID(context.Request.Context(), categoryID)
 	if err != nil {
-		ErrorResponse(context, http.StatusInternalServerError, err.Error())
+		services.ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -128,7 +142,7 @@ func (h *Handler) storeCreateProduct(context *gin.Context) {
 	files := form.File["images[][image]"]
 
 	if len(files) == 0 {
-		ErrorResponse(context, http.StatusBadRequest, "images required")
+		services.ErrorResponse(context, http.StatusBadRequest, "images required")
 		return
 	}
 
@@ -140,7 +154,7 @@ func (h *Handler) storeCreateProduct(context *gin.Context) {
 		isContains := contains(allowedExt, filepath.Ext(file.Filename))
 
 		if !isContains {
-			ErrorResponse(context, http.StatusBadRequest, "Icon must be jpg, jpeg or png")
+			services.ErrorResponse(context, http.StatusBadRequest, "Icon must be jpg, jpeg or png")
 			return
 		}
 
@@ -151,16 +165,16 @@ func (h *Handler) storeCreateProduct(context *gin.Context) {
 	productDTO := dto.CreateProductDTO{}
 	copier.Copy(&productDTO, &productInput)
 	productDTO.CategoryID = category.ID
-	productDTO.StoreID = storeID
+	productDTO.StoreID = store.ID
 
 	productDTO.Images = imagesArray
 	product, err := h.services.Products.Create(context.Request.Context(), productDTO)
 	if err != nil {
-		ErrorResponse(context, http.StatusInternalServerError, err.Error())
+		services.ErrorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	successResponse(context, product)
+	services.SuccessResponse(context, product)
 }
 
 // StoreUpdateProduct godoc

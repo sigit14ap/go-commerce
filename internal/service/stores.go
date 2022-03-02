@@ -29,3 +29,7 @@ func (service *StoresService) FindByDomain(ctx context.Context, domainStore stri
 func (service *StoresService) Create(ctx context.Context, store dto.StoreRegisterDTO) (domain.Store, error) {
 	return service.repo.Create(ctx, store)
 }
+
+func (service *StoresService) UpdateShipment(ctx context.Context, storeID primitive.ObjectID, shipment dto.StoreShipmentDTO) (domain.Store, error) {
+	return service.repo.UpdateShipment(ctx, storeID, shipment)
+}

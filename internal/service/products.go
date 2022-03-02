@@ -14,6 +14,27 @@ type ProductsService struct {
 	categoriesService Categories
 }
 
+func (p *ProductsService) GetBySellerID(ctx context.Context, storeID primitive.ObjectID) ([]domain.Product, error) {
+	products, err := p.repo.GetBySellerID(ctx, storeID)
+	if err != nil {
+		return nil, err
+	}
+
+	for i, product := range products {
+		products[i].TotalRating, err = p.reviewsService.GetTotalReviewRating(ctx, product.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		products[i].Category, err = p.categoriesService.FindByID(ctx, product.CategoryID)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return products, nil
+}
+
 func (p *ProductsService) FindAll(ctx context.Context) ([]domain.Product, error) {
 	products, err := p.repo.FindAll(ctx)
 	if err != nil {

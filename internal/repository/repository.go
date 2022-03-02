@@ -21,6 +21,7 @@ type Users interface {
 }
 
 type Products interface {
+	GetBySellerID(ctx context.Context, storeID primitive.ObjectID) ([]domain.Product, error)
 	FindAll(ctx context.Context) ([]domain.Product, error)
 	FindByID(ctx context.Context, productID primitive.ObjectID) (domain.Product, error)
 	Create(ctx context.Context, product domain.Product) (domain.Product, error)
@@ -101,6 +102,7 @@ type Stores interface {
 	FindByUserID(ctx context.Context, userID primitive.ObjectID) (domain.Store, error)
 	FindByDomain(ctx context.Context, domainStore string) (domain.Store, error)
 	Create(ctx context.Context, store dto.StoreRegisterDTO) (domain.Store, error)
+	UpdateShipment(ctx context.Context, storeID primitive.ObjectID, shipment dto.StoreShipmentDTO) (domain.Store, error)
 }
 
 type Repositories struct {

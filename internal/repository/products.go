@@ -12,6 +12,17 @@ type ProductsRepo struct {
 	db *mongo.Collection
 }
 
+func (p ProductsRepo) GetBySellerID(ctx context.Context, storeID primitive.ObjectID) ([]domain.Product, error) {
+	cursor, err := p.db.Find(ctx, bson.M{"store_id": storeID})
+	if err != nil {
+		return nil, err
+	}
+
+	var productArray []domain.Product
+	err = cursor.All(ctx, &productArray)
+	return productArray, err
+}
+
 func (p ProductsRepo) FindAll(ctx context.Context) ([]domain.Product, error) {
 	cursor, err := p.db.Find(ctx, bson.M{})
 	if err != nil {

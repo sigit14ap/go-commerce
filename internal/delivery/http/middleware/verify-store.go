@@ -33,4 +33,5 @@ func (verify *VerifyStore) Handle(context *gin.Context) {
 	}
 
 	context.Set("storeID", store.ID.Hex())
+	context.Set("storeData", store)
 }

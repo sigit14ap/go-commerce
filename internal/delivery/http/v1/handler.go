@@ -65,8 +65,8 @@ func (h *Handler) Init(api *gin.RouterGroup) {
 
 				storeAuth := store.Group("/", h.middlewares.VerifyStore.Handle)
 				{
+					h.initStoreSettingRoutes(storeAuth)
 					h.initStoreProductRoutes(storeAuth)
-
 				}
 
 			}

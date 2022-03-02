@@ -34,6 +34,16 @@ func GetIdFromRequestContext(context *gin.Context, paramName string) (primitive.
 	return id, nil
 }
 
+func GetDataFromContext(context *gin.Context, paramName string) (interface{}, error) {
+	data, ok := context.Get(paramName)
+
+	if !ok {
+		return data, errors.New("Data from context not found")
+	}
+
+	return data, nil
+}
+
 func GetIdFromRequest(paramName string) (primitive.ObjectID, error) {
 	if paramName == "" {
 		return primitive.ObjectID{}, errors.New("empty id param")
